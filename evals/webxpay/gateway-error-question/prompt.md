@@ -1,0 +1,1 @@
+My WebXPay checkout shows error 414 when I pass payment_gateway_id=96 with process_currency=USD, and in staging error 403. I only want Lanka QR and Commercial Bank cards offered. What's going on and how do I set that up?

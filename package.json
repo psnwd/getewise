@@ -1,0 +1,8 @@
+{
+  "name": "gatewise",
+  "version": "0.1.0",
+  "description": "Claude skills for payment gateways. Ask once, integrate right.",
+  "license": "MIT",
+  "private": true,
+  "scripts": { "package": "python scripts/package.py" }
+}

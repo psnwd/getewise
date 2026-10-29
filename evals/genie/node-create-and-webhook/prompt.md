@@ -1,0 +1,1 @@
+I have an Express (TypeScript) shop and want to take payments through Genie Business (Dialog Pay Business) in Sri Lanka. Write the server code: create the payment for an order of LKR 2,500.50, send the customer to pay, and handle the webhook so the order is only marked paid when it really is. Keep it short.

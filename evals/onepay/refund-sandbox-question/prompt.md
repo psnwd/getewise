@@ -1,0 +1,1 @@
+A customer paid on my OnePay integration yesterday in the sandbox. I called the refund API for half the amount and it failed. What am I doing wrong and what is the exact request for a partial refund once live?

@@ -1,0 +1,1 @@
+I'm adding WebXPay to a Node/Express shop. Write the server code to build the checkout form fields for order ORD-1042 total LKR 3,750.00, and the return-URL handler that decides if the payment succeeded. Keep it short.

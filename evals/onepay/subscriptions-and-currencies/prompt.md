@@ -1,0 +1,1 @@
+I'm a Sri Lankan SaaS selling in USD to customers abroad and LKR locally. Can OnePay do monthly subscriptions and which currencies and settlement should I expect? Anything I should check with them first?

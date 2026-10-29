@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: node-checkout-with-notify
+expected_outcome: |
+  Working Express/TypeScript code: server-side hash with 2-decimal amount (2500.50), posting to the sandbox
+  checkout URL, a form-urlencoded notify handler that recomputes md5sig, checks status_code 2 and the
+  amount/currency against the order, and does not expose the merchant secret to the client.

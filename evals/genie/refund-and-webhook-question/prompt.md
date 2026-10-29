@@ -1,0 +1,1 @@
+Genie Business: my webhook endpoint got a POST with state CONFIRMED. How do I know it really came from Genie, and is that enough to ship the order? Also a customer wants half their money back on that payment: what exactly do I call?
