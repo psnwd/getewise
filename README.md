@@ -41,7 +41,7 @@ Claude doesn't know these details well. Left alone, it guesses, and a wrong gues
 | **[WebXPay](skills/webxpay/SKILL.md)** | Sri Lanka | RSA-encrypted checkout, saved cards and recurring (Token V2), gateway IDs, plugins |
 | **[Genie Business](skills/genie/SKILL.md)** | Sri Lanka | Dialog Pay Business: hosted checkout, webhooks and signatures, card on file, recurring (MIT), refunds, plugins |
 
-Every gateway skill covers both **writing the integration** (Node/TypeScript, Go, Python, PHP/Laravel, Rust, Java, C#) and **answering support questions** (fees, limits, error codes, "why did this fail?"). More gateways are planned, see the [roadmap](ROADMAP.md).
+Every gateway skill covers both **writing the integration** (Node/TypeScript, Go, Python, PHP/Laravel, Rust, Java, C#) and **answering support questions** (fees, limits, error codes, "why did this fail?"). More gateways are planned.
 
 ## What to ask
 
@@ -166,3 +166,7 @@ gatewise/
 ## Licence
 
 [MIT](LICENSE), including the logo and brand assets.
+
+## Contributing
+
+New gateway, a fix or a test question: see [CONTRIBUTING.md](CONTRIBUTING.md). Security notes are in [SECURITY.md](SECURITY.md); changes are in [CHANGELOG.md](CHANGELOG.md). MIT licensed.

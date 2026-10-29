@@ -8,6 +8,9 @@
 5. Plugin manifests are valid JSON and list every skill.
 6. dist/*.skill files match skills/ (run `python scripts/package.py` if not).
 7. README lists every skill.
+8. Relative links in Markdown files resolve.
+9. No private keys or live-looking secrets are committed.
+10. Manifest versions agree.
 """
 import hashlib, json, re, subprocess, sys, zipfile
 from pathlib import Path
@@ -123,6 +126,33 @@ readme = (root / "README.md").read_text(encoding="utf-8")
 for n in skills:
     if f"skills/{n}/SKILL.md" not in readme: err(f"README.md does not list {n}")
 ok("README lists all skills")
+
+# 8 relative markdown links
+for md in list(root.glob("*.md")) + list((root / "docs").rglob("*.md")) + list((root / "skills").rglob("*.md")):
+    text = md.read_text(encoding="utf-8")
+    text = re.sub(r"```.*?```", "", text, flags=re.S)
+    for target in re.findall(r"\]\(([^)\s]+)\)", text):
+        if re.match(r"^(https?:|mailto:|#)", target): continue
+        path = target.split("#")[0]
+        if path and not (md.parent / path).resolve().exists():
+            err(f"{md.relative_to(root)}: broken link {target}")
+ok("markdown relative links")
+
+# 9 secrets scan
+bad = re.compile(r"-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|sk_live_[0-9a-zA-Z]{10,}|AKIA[0-9A-Z]{16}|ghp_[0-9A-Za-z]{30,}")
+for f in root.rglob("*"):
+    if not f.is_file() or f.suffix in {".skill", ".png", ".ico", ".svg"} or {".git", "dist", "node_modules"} & set(f.parts): continue
+    try: t = f.read_text(encoding="utf-8")
+    except Exception: continue
+    if bad.search(t): err(f"possible secret in {f.relative_to(root)}")
+ok("no secrets found")
+
+# 10 versions
+vers = {json.loads((root / "package.json").read_text())["version"],
+        json.loads((root / ".claude-plugin/plugin.json").read_text())["version"]}
+vers |= {p["version"] for p in mk["plugins"]}
+if len(vers) != 1: err(f"manifest versions differ: {sorted(vers)}")
+else: ok(f"manifest versions agree ({vers.pop()})")
 
 print()
 if errors: sys.exit(f"{len(errors)} problem(s)")
