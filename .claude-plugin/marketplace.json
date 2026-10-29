@@ -1,0 +1,101 @@
+{
+  "name": "gatewise",
+  "owner": {
+    "name": "BlackCAT",
+    "url": "https://github.com/psnwd"
+  },
+  "metadata": {
+    "description": "Gatewise: Claude skills for payment gateways."
+  },
+  "plugins": [
+    {
+      "name": "gatewise",
+      "source": "./skills",
+      "strict": false,
+      "skills": [
+        "./payhere",
+        "./onepay",
+        "./webxpay",
+        "./genie"
+      ],
+      "description": "All Gatewise payment gateway skills: PayHere, OnePay, WebXPay and Genie Business (Sri Lanka).",
+      "version": "0.1.0",
+      "author": {
+        "name": "BlackCAT",
+        "url": "https://github.com/psnwd"
+      },
+      "homepage": "https://github.com/psnwd/getewise",
+      "repository": "https://github.com/psnwd/getewise",
+      "license": "MIT",
+      "category": "payments"
+    },
+    {
+      "name": "payhere",
+      "source": "./skills",
+      "strict": false,
+      "skills": [
+        "./payhere"
+      ],
+      "description": "PayHere (Sri Lanka): checkout, recurring, preapproval, refunds, SDKs, plugins, plans and troubleshooting.",
+      "version": "0.1.0",
+      "author": {
+        "name": "BlackCAT",
+        "url": "https://github.com/psnwd"
+      },
+      "repository": "https://github.com/psnwd/getewise",
+      "license": "MIT",
+      "category": "payments"
+    },
+    {
+      "name": "onepay",
+      "source": "./skills",
+      "strict": false,
+      "skills": [
+        "./onepay"
+      ],
+      "description": "OnePay (Sri Lanka): redirect checkout, JS SDK, payment links, card on file, refunds, payouts, plugins.",
+      "version": "0.1.0",
+      "author": {
+        "name": "BlackCAT",
+        "url": "https://github.com/psnwd"
+      },
+      "repository": "https://github.com/psnwd/getewise",
+      "license": "MIT",
+      "category": "payments"
+    },
+    {
+      "name": "webxpay",
+      "source": "./skills",
+      "strict": false,
+      "skills": [
+        "./webxpay"
+      ],
+      "description": "WebXPay (Sri Lanka): RSA-encrypted checkout, Token V2 saved cards and MIT, gateway IDs, plugins, error codes.",
+      "version": "0.1.0",
+      "author": {
+        "name": "BlackCAT",
+        "url": "https://github.com/psnwd"
+      },
+      "repository": "https://github.com/psnwd/getewise",
+      "license": "MIT",
+      "category": "payments"
+    },
+    {
+      "name": "genie",
+      "source": "./skills",
+      "strict": false,
+      "skills": [
+        "./genie"
+      ],
+      "description": "Genie Business / Dialog Pay Business (Sri Lanka): hosted checkout, webhooks and signatures, card on file, MIT recurring, refunds, plugins.",
+      "version": "0.1.0",
+      "author": {
+        "name": "BlackCAT",
+        "url": "https://github.com/psnwd"
+      },
+      "repository": "https://github.com/psnwd/getewise",
+      "license": "MIT",
+      "category": "payments"
+    }
+  ]
+}

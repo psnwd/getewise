@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: rust-trial-subscription-hash
+expected_outcome: |
+  Uses the Recurring API with recurrence "1 Month", duration, recurring_start_date 2026-12-15, the real amount
+  2500.00 in the form, but 10.00 (LKR override) in the hash computation; Rust code using an md5 crate;
+  states that recurring_start_date is live-only and not supported in sandbox, and mentions the sandbox's
+  accelerated one-minute installment for other recurring tests.

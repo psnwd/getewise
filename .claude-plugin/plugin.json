@@ -1,0 +1,10 @@
+{
+  "name": "gatewise",
+  "version": "0.1.0",
+  "description": "Claude skills for payment gateways (PayHere, OnePay, WebXPay, Genie Business). Ask once, integrate right.",
+  "author": { "name": "BlackCAT", "url": "https://github.com/psnwd" },
+  "homepage": "https://github.com/psnwd/getewise",
+  "repository": "https://github.com/psnwd/getewise",
+  "license": "MIT",
+  "keywords": ["payments", "payment-gateway", "sri-lanka", "payhere", "onepay", "webxpay", "genie", "dialog", "checkout", "agent-skills"]
+}

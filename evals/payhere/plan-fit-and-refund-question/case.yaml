@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: plan-fit-and-refund-question
+expected_outcome: |
+  Explains that drop-shipping is an unsupported business model for PayHere approval, that the free LITE plan
+  only supports one-time LKR/USD payments (recurring needs PLUS or higher), and that partial refunds are
+  contradictory in the docs (KB says unsupported, Refund API has an amount param) so it should be confirmed
+  with PayHere support. Concise, no invented numbers.

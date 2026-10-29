@@ -1,0 +1,1 @@
+Laravel app, Genie Business (Dialog Pay Business). Customers pay a monthly subscription of LKR 1,500. I want to save their card on the first payment and then charge it every month automatically without them being there. How do I set that up, and what do I send?

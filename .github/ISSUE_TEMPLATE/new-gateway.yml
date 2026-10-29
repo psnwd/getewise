@@ -1,0 +1,16 @@
+name: Request a gateway
+description: Ask for a new payment gateway skill
+labels: [enhancement]
+body:
+  - type: input
+    id: name
+    attributes: { label: Gateway name and country }
+    validations: { required: true }
+  - type: input
+    id: docs
+    attributes: { label: Public developer docs URL }
+    validations: { required: true }
+  - type: textarea
+    id: why
+    attributes:
+      label: What would you ask Claude about it?

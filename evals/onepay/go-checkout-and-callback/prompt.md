@@ -1,0 +1,1 @@
+I run a Go (net/http) store and want to accept payments with OnePay Sri Lanka. Write the server code: create the checkout for LKR 2,500.50, redirect the customer, and handle the callback so the order is only marked paid when it really is. Keep it short.
