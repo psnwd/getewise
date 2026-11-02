@@ -12,6 +12,6 @@ Ground rules
 - Code samples: say which languages you actually ran. Mark the rest "not run".
 - Never commit real keys, secrets or customer data.
 - Run `python scripts/package.py` then `python scripts/verify.py` before a PR. CI runs `verify.py` and fails if `dist/` is stale, a reference file is unlinked, or a signing helper no longer matches its test vector.
-- Releases: tag `vX.Y.Z` and the release workflow attaches the `.skill` files.
+- Releases: tag `vX.Y.Z` and the release workflow publishes the matching CHANGELOG section as notes and attaches the `.skill` files (tag must equal the `package.json` version).
 
 See also [SECURITY.md](SECURITY.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [CHANGELOG.md](CHANGELOG.md). Add a line to the changelog for user-visible changes.

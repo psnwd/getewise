@@ -13,10 +13,17 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install cryptography
+      - name: Tag must match manifest version
+        run: |
+          v=$(python -c "import json;print(json.load(open('package.json'))['version'])")
+          [ "v$v" = "$GITHUB_REF_NAME" ] || { echo "tag $GITHUB_REF_NAME != package.json $v"; exit 1; }
+      - name: Release notes from CHANGELOG.md
+        run: python scripts/changelog_notes.py "$GITHUB_REF_NAME" > release-notes.md
       - run: python scripts/package.py
       - run: python scripts/verify.py
-      - name: Publish .skill files to the GitHub release
+      - name: Publish release with .skill files
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*.skill
-          generate_release_notes: true
+          body_path: release-notes.md
+          prerelease: ${{ contains(github.ref_name, '-') }}
