@@ -43,6 +43,8 @@ Claude doesn't know these details well. Left alone, it guesses, and a wrong gues
 | **[Gatewise router](skills/gatewise/SKILL.md)** | Sri Lanka | Optional: picks the right gateway skill from your region, features and stack |
 | **[Payment basics](skills/payment-basics/SKILL.md)** | Any | Optional: gateway-agnostic idempotency, callback verification, reconciliation, PCI scope and secrets |
 | **[Payment security review](skills/payment-security-review/SKILL.md)** | Any | Optional: evidence-based review of checkout, callback, refund and key handling code |
+| **[Payment testing](skills/payment-testing/SKILL.md)** | Any | Optional: sandbox hosts, published test cards, live-only gaps and a go-live scenario checklist |
+| **[Payment refunds](skills/payment-refunds/SKILL.md)** | Any | Optional: refund/partial refund/chargeback matrix per gateway and a safe refund endpoint design |
 | **[Genie Business](skills/genie/SKILL.md)** | Sri Lanka | Dialog Pay Business: hosted checkout, webhooks and signatures, card on file, recurring (MIT), refunds, plugins |
 
 Every gateway skill covers both **writing the integration** (Node/TypeScript, Go, Python, PHP/Laravel, Rust, Java, C#) and **answering support questions** (fees, limits, error codes, "why did this fail?"). More gateways are planned.

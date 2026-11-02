@@ -6,6 +6,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions use `vX
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-02
+### Added
+- **Router: external providers** (Stripe, PayPal, Paddle, Lemon Squeezy) point to the vendors' current skills/docs instead of embedding API facts; 1 new eval.
+- **`payment-testing` skill**: per-gateway sandbox and test-card facts, live-only gaps, scenario checklist; 3 evals.
+- **`payment-refunds` skill**: refund/partial/chargeback matrix for the five gateways (marks undocumented ones) and a safe refund endpoint design; 3 evals.
+
 ## [0.2.0] - 2026-11-02
 ### Added
 - **`gatewise` router skill**: picks the gateway skill from the user's region, features and stack; 3 evals.
