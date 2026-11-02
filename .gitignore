@@ -5,3 +5,6 @@ __pycache__/
 .verify_*
 
 ROADMAP.md
+
+# Developer
+.dev/

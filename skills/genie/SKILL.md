@@ -36,6 +36,20 @@ Genie Business is Dialog's payment gateway for Sri Lankan merchants: cards (Visa
 8. **Test first on UAT.** Sandbox keys are issued on request; production keys are in the dashboard under Connect. Production can also run a "test payment provider" that bills nothing.
 
 ## Working style
+- **Env files:** for several providers, one block per provider under a banner, **two blank lines between blocks**, every var prefixed (`PAYHERE_*`, `ONEPAY_*`, `WEBXPAY_*`, `GENIE_*`, `KOKO_*`), host/base URL first so sandbox vs live is obvious. Only vars the generated code reads; empty placeholders, never real keys. If the user names no provider, include a block for all five. Shape:
+  ```
+  # ============================ PayHere ============================
+  PAYHERE_HOST=https://sandbox.payhere.lk
+  PAYHERE_APP_ID=
+  PAYHERE_APP_SECRET=
+
+
+  # ============================ Koko ===============================
+  KOKO_HOST=https://qaapi.paykoko.com
+  KOKO_MID=
+  KOKO_API_KEY=
+  KOKO_PRIVATE_KEY_PEM=
+  ```
 - If the goal is ambiguous (hosted page vs payment link vs recurring), state the assumption and proceed.
 - Show a full flow: create order > create transaction (minor units) > redirect to `url` > webhook with signature check > Get Transaction > idempotent DB update > status page from the DB.
 - Flag contradictions listed in `troubleshooting.md` (Get Transaction path, `expiryDate` format, `recurringFrequency` values, refund unit) instead of silently choosing; tell the user to confirm with Genie support or in the Stoplight "Try it" console.

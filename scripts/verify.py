@@ -100,6 +100,34 @@ try:
 except ImportError:
     print("skip webxpay round trip (pip install cryptography)")
 
+try:
+    import base64, tempfile, os
+    from cryptography.hazmat.primitives.asymmetric import rsa, padding
+    from cryptography.hazmat.primitives import hashes, serialization
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    fd, kp = tempfile.mkstemp(suffix=".pem"); os.close(fd)
+    fd, pp = tempfile.mkstemp(suffix=".pem"); os.close(fd)
+    Path(kp).write_bytes(key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()))
+    Path(pp).write_bytes(key.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo))
+    ko = ["--mid", "M1", "--amount", "300.00", "--currency", "LKR", "--plugin-name", "customapi", "--plugin-version", "1.0.1",
+          "--return-url", "R", "--cancel-url", "C", "--order-id", "53", "--reference", "53", "--first-name", "J", "--last-name", "D",
+          "--email", "e", "--description", "d", "--api-key", "K", "--response-url", "U"]
+    r = run("skills/koko/scripts/koko_sign.py", "order", "--key", kp, *ko)
+    want = "M1300.00LKRcustomapi1.0.1RC53" "53JDedKU"  # field order from Koko API v1.05
+    sig = r.stdout.split("signature :")[-1].strip() if r.returncode == 0 else ""
+    try: key.public_key().verify(base64.b64decode(sig), want.encode(), padding.PKCS1v15(), hashes.SHA256()); sig_ok = True
+    except Exception: sig_ok = False
+    if f"dataString: {want}" not in r.stdout or not sig_ok: err("koko order dataString/signature mismatch: " + r.stdout + r.stderr)
+    else:
+        cb = base64.b64encode(key.sign(b"53T1SUCCESS", padding.PKCS1v15(), hashes.SHA256())).decode()
+        v = run("skills/koko/scripts/koko_sign.py", "verify", "--key", pp, "--order-id", "53", "--trn-id", "T1", "--status", "SUCCESS", "--signature", cb)
+        bad = run("skills/koko/scripts/koko_sign.py", "verify", "--key", pp, "--order-id", "53", "--trn-id", "T1", "--status", "FAILED", "--signature", cb)
+        if v.returncode or "VALID" not in v.stdout or bad.returncode == 0: err("koko verify wrong")
+        else: ok("koko order dataString + signature, callback verify (valid accepted, tampered rejected)")
+    os.unlink(kp); os.unlink(pp)
+except ImportError:
+    print("skip koko round trip (pip install cryptography)")
+
 # 5 manifests
 for f in (".claude-plugin/plugin.json", ".claude-plugin/marketplace.json", "package.json"):
     try: json.loads((root / f).read_text(encoding="utf-8"))
@@ -141,7 +169,7 @@ ok("markdown relative links")
 # 9 secrets scan
 bad = re.compile(r"-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|sk_live_[0-9a-zA-Z]{10,}|AKIA[0-9A-Z]{16}|ghp_[0-9A-Za-z]{30,}")
 for f in root.rglob("*"):
-    if not f.is_file() or f.suffix in {".skill", ".png", ".ico", ".svg"} or {".git", "dist", "node_modules"} & set(f.parts): continue
+    if not f.is_file() or f.suffix in {".skill", ".png", ".ico", ".svg"} or {".git", ".dev", "dist", "node_modules"} & set(f.parts): continue
     try: t = f.read_text(encoding="utf-8")
     except Exception: continue
     if bad.search(t): err(f"possible secret in {f.relative_to(root)}")

@@ -16,9 +16,10 @@
         "./payhere",
         "./onepay",
         "./webxpay",
+        "./koko",
         "./genie"
       ],
-      "description": "All Gatewise payment gateway skills: PayHere, OnePay, WebXPay and Genie Business (Sri Lanka).",
+      "description": "All Gatewise payment gateway skills: PayHere, OnePay, WebXPay, Genie Business and Koko (Sri Lanka).",
       "version": "0.1.0",
       "author": {
         "name": "BlackCAT",
@@ -71,6 +72,23 @@
         "./webxpay"
       ],
       "description": "WebXPay (Sri Lanka): RSA-encrypted checkout, Token V2 saved cards and MIT, gateway IDs, plugins, error codes.",
+      "version": "0.1.0",
+      "author": {
+        "name": "BlackCAT",
+        "url": "https://github.com/psnwd"
+      },
+      "repository": "https://github.com/psnwd/getewise",
+      "license": "MIT",
+      "category": "payments"
+    },
+    {
+      "name": "koko",
+      "source": "./skills",
+      "strict": false,
+      "skills": [
+        "./koko"
+      ],
+      "description": "Koko (Sri Lanka BNPL): RSA-signed orderCreate, signed callback verification, Order View API, troubleshooting.",
       "version": "0.1.0",
       "author": {
         "name": "BlackCAT",

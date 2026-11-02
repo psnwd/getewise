@@ -39,6 +39,20 @@ PayHere (PayHere (Pvt) Ltd) is a CBSL-approved payment gateway for Sri Lankan bu
 8. **Hash exceptions.** Preapproval with no amount hashes `10.00` (LKR) / `0.51` (other currencies); recurring with a future `recurring_start_date` hashes `10.00` (LKR) / `0.50` (other) while still submitting the real amount.
 
 ## Working style
+- **Env files:** for several providers, one block per provider under a banner, **two blank lines between blocks**, every var prefixed (`PAYHERE_*`, `ONEPAY_*`, `WEBXPAY_*`, `GENIE_*`, `KOKO_*`), host/base URL first so sandbox vs live is obvious. Only vars the generated code reads; empty placeholders, never real keys. If the user names no provider, include a block for all five. Shape:
+  ```
+  # ============================ PayHere ============================
+  PAYHERE_HOST=https://sandbox.payhere.lk
+  PAYHERE_APP_ID=
+  PAYHERE_APP_SECRET=
+
+
+  # ============================ Koko ===============================
+  KOKO_HOST=https://qaapi.paykoko.com
+  KOKO_MID=
+  KOKO_API_KEY=
+  KOKO_PRIVATE_KEY_PEM=
+  ```
 - When the user's goal is ambiguous (redirect vs popup vs mobile, one-time vs subscription vs on-demand), pick from the routing table by asking one short question or by stating the assumption and proceeding.
 - Prefer showing a complete minimal flow: create order > server hash > form/popup > notify handler with verification > idempotent DB update > status page from DB.
 - If the user's stack is not one of the seven covered, adapt the algorithm (MD5, uppercase hex) and say which part you adapted.

@@ -36,6 +36,20 @@ WEBXPAY is a Sri Lankan payment aggregator: one checkout across bank card gatewa
 8. **Token V2** (saved cards, MIT) is a different, bearer-token JSON API with hosts and `bankMID`s issued at onboarding; don't mix it with the redirect form.
 
 ## Working style
+- **Env files:** for several providers, one block per provider under a banner, **two blank lines between blocks**, every var prefixed (`PAYHERE_*`, `ONEPAY_*`, `WEBXPAY_*`, `GENIE_*`, `KOKO_*`), host/base URL first so sandbox vs live is obvious. Only vars the generated code reads; empty placeholders, never real keys. If the user names no provider, include a block for all five. Shape:
+  ```
+  # ============================ PayHere ============================
+  PAYHERE_HOST=https://sandbox.payhere.lk
+  PAYHERE_APP_ID=
+  PAYHERE_APP_SECRET=
+
+
+  # ============================ Koko ===============================
+  KOKO_HOST=https://qaapi.paykoko.com
+  KOKO_MID=
+  KOKO_API_KEY=
+  KOKO_PRIVATE_KEY_PEM=
+  ```
 - If the goal is ambiguous (redirect vs saved cards/recurring), state the assumption and proceed.
 - Show a full flow: create order > server-side encrypt > POST form > return handler (decode, signature check, DB amount check, idempotent update).
 - Flag documented contradictions from `troubleshooting.md`.

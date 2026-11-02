@@ -38,6 +38,20 @@ OnePay (onepay.lk) is a Sri Lankan payment gateway (cards, Frimi, QPlus, HelaPay
 8. **Customer phone** must be E.164 (`+94771234567`); `transaction_redirect_url` must be HTTPS.
 
 ## Working style
+- **Env files:** for several providers, one block per provider under a banner, **two blank lines between blocks**, every var prefixed (`PAYHERE_*`, `ONEPAY_*`, `WEBXPAY_*`, `GENIE_*`, `KOKO_*`), host/base URL first so sandbox vs live is obvious. Only vars the generated code reads; empty placeholders, never real keys. If the user names no provider, include a block for all five. Shape:
+  ```
+  # ============================ PayHere ============================
+  PAYHERE_HOST=https://sandbox.payhere.lk
+  PAYHERE_APP_ID=
+  PAYHERE_APP_SECRET=
+
+
+  # ============================ Koko ===============================
+  KOKO_HOST=https://qaapi.paykoko.com
+  KOKO_MID=
+  KOKO_API_KEY=
+  KOKO_PRIVATE_KEY_PEM=
+  ```
 - If the goal is ambiguous (redirect vs overlay vs link vs recurring), state the assumption and proceed.
 - Show a full flow: create order > server hash > create transaction > redirect > callback + status verification > idempotent DB update.
 - Flag contradictions listed in `troubleshooting.md` instead of silently choosing.
