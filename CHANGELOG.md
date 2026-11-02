@@ -2,6 +2,11 @@
 
 Format follows [Keep a Changelog](https://keepachangelog.com/). Versions use `vX.Y.Z` tags.
 
+## [Unreleased]
+### Added
+- `gatewise` router skill: picks a gateway skill from region, features and stack (with 3 evals).
+- `references/multi-provider.md` in every gateway skill; Koko webhook handlers and `orderView` reconciliation example; banner-separated per-provider `.env` guidance.
+
 ## [0.1.0] - 2026-10-29
 ### Added
 - Skills: PayHere, OnePay, WebXPay, Genie Business (Dialog Pay Business), Koko (BNPL), each with references, helper script (where useful), 3 evals and a benchmark.

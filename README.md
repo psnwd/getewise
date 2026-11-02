@@ -40,6 +40,7 @@ Claude doesn't know these details well. Left alone, it guesses, and a wrong gues
 | **[OnePay](skills/onepay/SKILL.md)** | Sri Lanka | Redirect checkout, JS SDK, payment links, card on file, refunds, payouts, plugins |
 | **[WebXPay](skills/webxpay/SKILL.md)** | Sri Lanka | RSA-encrypted checkout, saved cards and recurring (Token V2), gateway IDs, plugins |
 | **[Koko](skills/koko/SKILL.md)** | Sri Lanka | BNPL, RSA-signed orderCreate form, signed server callback, Order View API |
+| **[Gatewise router](skills/gatewise/SKILL.md)** | Sri Lanka | Optional: picks the right gateway skill from your region, features and stack |
 | **[Genie Business](skills/genie/SKILL.md)** | Sri Lanka | Dialog Pay Business: hosted checkout, webhooks and signatures, card on file, recurring (MIT), refunds, plugins |
 
 Every gateway skill covers both **writing the integration** (Node/TypeScript, Go, Python, PHP/Laravel, Rust, Java, C#) and **answering support questions** (fees, limits, error codes, "why did this fail?"). More gateways are planned.
