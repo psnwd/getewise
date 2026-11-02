@@ -5,6 +5,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions use `vX
 ## [Unreleased]
 ### Added
 - `gatewise` router skill: picks a gateway skill from region, features and stack (with 3 evals).
+- `payment-basics` skill: gateway-agnostic idempotency, callback verification, reconciliation, PCI and secrets (with 3 evals).
 - `references/multi-provider.md` in every gateway skill; Koko webhook handlers and `orderView` reconciliation example; banner-separated per-provider `.env` guidance.
 
 ## [0.1.0] - 2026-10-29

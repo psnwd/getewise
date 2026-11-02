@@ -14,13 +14,14 @@
       "strict": false,
       "skills": [
         "./gatewise",
+        "./payment-basics",
         "./payhere",
         "./onepay",
         "./webxpay",
         "./koko",
         "./genie"
       ],
-      "description": "All Gatewise payment gateway skills: PayHere, OnePay, WebXPay, Genie Business and Koko (Sri Lanka), plus a router that picks one.",
+      "description": "All Gatewise payment gateway skills: PayHere, OnePay, WebXPay, Genie Business and Koko (Sri Lanka), a router that picks one, and shared payment-basics.",
       "version": "0.1.0",
       "author": {
         "name": "BlackCAT",
@@ -39,6 +40,23 @@
         "./gatewise"
       ],
       "description": "Router: picks the right Sri Lankan gateway skill from the user's region, features and stack.",
+      "version": "0.1.0",
+      "author": {
+        "name": "BlackCAT",
+        "url": "https://github.com/psnwd"
+      },
+      "repository": "https://github.com/psnwd/getewise",
+      "license": "MIT",
+      "category": "payments"
+    },
+    {
+      "name": "payment-basics",
+      "source": "./skills",
+      "strict": false,
+      "skills": [
+        "./payment-basics"
+      ],
+      "description": "Gateway-agnostic payment rules: idempotency, callback verification, reconciliation, PCI scope and secrets.",
       "version": "0.1.0",
       "author": {
         "name": "BlackCAT",
