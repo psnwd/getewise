@@ -15,13 +15,14 @@
       "skills": [
         "./gatewise",
         "./payment-basics",
+        "./payment-security-review",
         "./payhere",
         "./onepay",
         "./webxpay",
         "./koko",
         "./genie"
       ],
-      "description": "All Gatewise payment gateway skills: PayHere, OnePay, WebXPay, Genie Business and Koko (Sri Lanka), a router that picks one, and shared payment-basics.",
+      "description": "All Gatewise payment gateway skills: PayHere, OnePay, WebXPay, Genie Business and Koko (Sri Lanka), a router that picks one, and shared payment-basics and payment-security-review.",
       "version": "0.1.0",
       "author": {
         "name": "BlackCAT",
@@ -57,6 +58,23 @@
         "./payment-basics"
       ],
       "description": "Gateway-agnostic payment rules: idempotency, callback verification, reconciliation, PCI scope and secrets.",
+      "version": "0.1.0",
+      "author": {
+        "name": "BlackCAT",
+        "url": "https://github.com/psnwd"
+      },
+      "repository": "https://github.com/psnwd/getewise",
+      "license": "MIT",
+      "category": "payments"
+    },
+    {
+      "name": "payment-security-review",
+      "source": "./skills",
+      "strict": false,
+      "skills": [
+        "./payment-security-review"
+      ],
+      "description": "Evidence-based security review of payment integrations: forged callbacks, amount tampering, secret leaks, IDOR, refund abuse.",
       "version": "0.1.0",
       "author": {
         "name": "BlackCAT",

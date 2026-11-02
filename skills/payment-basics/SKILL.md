@@ -45,4 +45,6 @@ A job (hourly/daily) looks up every order `pending` older than N minutes via the
 ## 7. Test before live
 Sandbox: success, failure, cancel, duplicate callback, tampered amount, bad signature, callback before return page, callback never arriving (reconciliation recovers).
 
+Reviewing existing payment code for flaws: use the payment-security-review skill.
+
 Several gateways in one app: see the multi-provider reference bundled in each gateway skill.
