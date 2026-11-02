@@ -1,6 +1,6 @@
 {
   "name": "gatewise",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Claude skills for payment gateways. Ask once, integrate right.",
   "license": "MIT",
   "private": true,

@@ -5,6 +5,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions use `vX
 **Releasing:** move the `[Unreleased]` entries under a new `## [X.Y.Z] - YYYY-MM-DD` heading, bump the version in `package.json`, `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`, then `git tag vX.Y.Z && git push --tags`. The release workflow publishes that section as the release notes and attaches the `.skill` files.
 
 ## [Unreleased]
+
+## [0.2.0] - 2026-11-02
 ### Added
 - **`gatewise` router skill**: picks the gateway skill from the user's region, features and stack; 3 evals.
 - **`payment-basics` skill**: gateway-agnostic idempotency, callback verification, reconciliation, PCI scope and secrets; 3 evals.
@@ -24,5 +26,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions use `vX
 - `scripts/verify.py` (CI) and `scripts/package.py` (builds `dist/*.skill`).
 - Logo, banner, README, roadmap, contributing guide, gateway template.
 
-[Unreleased]: https://github.com/psnwd/getewise/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/psnwd/getewise/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/psnwd/getewise/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/psnwd/getewise/releases/tag/v0.1.0
