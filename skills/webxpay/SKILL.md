@@ -24,6 +24,7 @@ WEBXPAY is a Sri Lankan payment aggregator: one checkout across bank card gatewa
 | Shopify, WooCommerce (Magento/OpenCart/PrestaShop/WHMCS are listed but undocumented) | `references/plugins.md` |
 | Code in PHP, Node/TS, Python, Go, Java, Rust, C# | `references/code-examples.md` |
 | Any error code, "why declined", doc gaps/contradictions | `references/troubleshooting.md` |
+| App uses several gateways: env layout, callback routes, shared idempotent settle | `references/multi-provider.md` |
 
 ## Core rules
 1. **No MD5/SHA request hash.** Redirect checkout sends `payment = base64(RSA_PKCS1v15_encrypt(WEBXPAY_PUBLIC_KEY, "unique_order_id|total_amount"))`, e.g. `12001|2567.50`. The public key is in Dashboard > Settings > Integration Information (generated after activation). The `secret_key` (same page) goes in the POST too.

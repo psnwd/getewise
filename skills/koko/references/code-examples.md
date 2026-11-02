@@ -175,3 +175,35 @@ def koko_response(request):
         order.mark_paid(p["trnId"])
     return HttpResponse(status=200)
 ```
+
+# Reconciliation job (missing `_responseUrl` callbacks)
+Run every few minutes. Looks up orders still pending after a grace period, asks Koko via `orderView`, and applies the result through the same idempotent path as the callback. See `order-view-api.md` for the fields.
+
+```ts
+import { createSign } from "node:crypto";
+import { kokoVerify } from "./koko";            // from Node example above
+
+async function kokoOrderView(orderId: string) {
+  const f = { _mId: process.env.KOKO_MID!, api_key: process.env.KOKO_API_KEY!, _orderId: orderId,
+              _pluginName: "customapi", _pluginVersion: "1.0.1" };
+  const dataString = f._mId + f._pluginName + f._pluginVersion + f._orderId + f.api_key;   // fixed order, no separators
+  const signature = createSign("RSA-SHA256").update(dataString).sign(process.env.KOKO_PRIVATE_KEY_PEM!, "base64");
+  const res = await fetch(`${process.env.KOKO_HOST}/api/merchants/orderView`, {
+    method: "POST", body: new URLSearchParams({ ...f, signature }),   // form-encoded
+  });
+  return res.ok ? await res.json() : null;      // { orderId, trnId, status, desc, signature }
+}
+
+export async function reconcileKoko() {
+  const cutoff = new Date(Date.now() - 10 * 60_000);          // callback grace period
+  for (const o of await db.orders.pendingBefore("koko", cutoff)) {
+    const r = await kokoOrderView(o.id);
+    if (!r || r.orderId !== o.id) continue;                    // retry next run
+    // ponytail: signed string for the response is assumed orderId+trnId+status (PDF is silent); drop this check if Koko confirms otherwise
+    if (!kokoVerify(r.orderId, r.trnId, r.status, r.signature)) continue;
+    if (r.status === "SUCCESS") await db.orders.markPaid(o.id, r.trnId);        // idempotent
+    else if (r.status === "FAILED") await db.orders.markFailed(o.id);
+    // PENDING: leave; give up (expire) after your own max age
+  }
+}
+```

@@ -24,6 +24,7 @@ Genie Business is Dialog's payment gateway for Sri Lankan merchants: cards (Visa
 | Sandbox (UAT) vs production, API key, plugins, support contacts, account | `references/environments-account.md` |
 | Code in Node/TS, Go, Python, PHP/Laravel, Rust, Java, C# | `references/code-examples.md` |
 | Any error, doc contradiction, missing endpoint, security review | `references/troubleshooting.md` |
+| App uses several gateways: env layout, callback routes, shared idempotent settle | `references/multi-provider.md` |
 
 ## Core rules
 1. **Auth** = your API key in the `Authorization` header, as the docs show it (`Authorization: <key>`, no `Bearer`). Server-side only. Production base `https://api.geniebiz.lk`, sandbox/UAT `https://api.uat.geniebiz.lk`; they use different keys.

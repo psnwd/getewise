@@ -27,6 +27,7 @@ PayHere (PayHere (Pvt) Ltd) is a CBSL-approved payment gateway for Sri Lankan bu
 | Code in Node/TS, Go, Python, PHP/Laravel, Rust, Java, C# | `references/code-examples.md`, `references/code-rest-api.md` |
 | Applying for an account, plans/fees/limits, payouts, USD payouts, refunds policy, Links/Buttons, required policy pages | `references/account-business.md` |
 | Any error, mismatch, "why isn't notify firing", security review, doc contradictions | `references/troubleshooting.md` |
+| App uses several gateways: env layout, callback routes, shared idempotent settle | `references/multi-provider.md` |
 
 ## Core rules (the things most integrations get wrong)
 1. **Server-side hash.** `hash = UPPER(md5(merchant_id + order_id + amount + currency + UPPER(md5(merchant_secret))))`, amount as `1000.00` (2 decimals, no commas). Never compute it in the browser or app; it would expose the secret. (Required since 2023-01-16.)

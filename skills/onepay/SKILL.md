@@ -26,6 +26,7 @@ OnePay (onepay.lk) is a Sri Lankan payment gateway (cards, Frimi, QPlus, HelaPay
 | WordPress/WooCommerce, Shopify, WHMCS, Zoho | `references/plugins.md` |
 | Code in Node/TS, Go, Python, PHP/Laravel, Rust, Java, C# | `references/code-examples.md` |
 | Any error, 401/400/429, "what does status 1 mean", doc gaps | `references/troubleshooting.md` |
+| App uses several gateways: env layout, callback routes, shared idempotent settle | `references/multi-provider.md` |
 
 ## Core rules
 1. **Two auth styles.** Payment API (create transaction) signs the body with `hash = SHA256(app_id + currency + amount + HASH_SALT)` (plain concatenation, amount like `100.00`). Everything else (Refund, Payouts, Payment Link, Card on File, Items) uses the App Token in the `Authorization` header. Keep `HASH_SALT` and App Token server-side.

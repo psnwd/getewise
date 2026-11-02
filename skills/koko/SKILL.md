@@ -22,6 +22,7 @@ Koko is a Sri Lankan Buy-Now-Pay-Later gateway: customer is redirected to Koko, 
 | Check order status server-side (`orderView`) | `references/order-view-api.md` |
 | Code in PHP, Node/TS, Python, Go | `references/code-examples.md` |
 | Errors, doc gaps/contradictions, go-live checklist | `references/troubleshooting.md` |
+| App uses several gateways: env layout, callback routes, shared idempotent settle | `references/multi-provider.md` |
 
 ## Core rules
 1. **Request is a signed form POST** to `{host}/api/merchants/orderCreate` (`application/x-www-form-urlencoded`), done by the customer's browser via an auto-submitting hidden form. Hosts: `devapi`, `qaapi`, `prodapi` `.paykoko.com`.
