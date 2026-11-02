@@ -17,7 +17,7 @@
 <p align="center">
   <a href="https://github.com/psnwd/getewise/actions/workflows/verify.yml"><img src="https://github.com/psnwd/getewise/actions/workflows/verify.yml/badge.svg" alt="verify"></a>
   <img src="https://img.shields.io/badge/license-MIT-12304A" alt="MIT">
-  <img src="https://img.shields.io/badge/gateways-4-F2A31B" alt="4 gateways">
+  <img src="https://img.shields.io/badge/gateways-5-F2A31B" alt="5 gateways">
 </p>
 
 ---
@@ -47,6 +47,8 @@ Claude doesn't know these details well. Left alone, it guesses, and a wrong gues
 | **[Payment refunds](skills/payment-refunds/SKILL.md)** | Any | Optional: refund/partial refund/chargeback matrix per gateway and a safe refund endpoint design |
 | **[Genie Business](skills/genie/SKILL.md)** | Sri Lanka | Dialog Pay Business: hosted checkout, webhooks and signatures, card on file, recurring (MIT), refunds, plugins |
 
+Beyond Sri Lanka, the router also points Stripe, PayPal, Paddle and Lemon Squeezy requests to those vendors' own current skills and docs. Gatewise embeds no API facts for them.
+
 Every gateway skill covers both **writing the integration** (Node/TypeScript, Go, Python, PHP/Laravel, Rust, Java, C#) and **answering support questions** (fees, limits, error codes, "why did this fail?"). More gateways are planned.
 
 ## What to ask
@@ -59,6 +61,9 @@ Just talk to Claude as you normally would:
 - *"Can I do monthly subscriptions on PayHere's free plan?"*
 - *"Write the WebXPay `payment` field in Go."*
 - *"How do I verify a Genie Business webhook before shipping the order?"*
+- *"Give me a test plan before I go live with PayHere."*
+- *"How do I issue a partial refund safely?"*
+- *"Add PayPal checkout to my Laravel app."* (routed to PayPal's own toolkit)
 
 Claude loads only the notes it needs, so answers stay fast and focused.
 
@@ -77,7 +82,7 @@ Pick the one that matches how you use Claude.
 /plugin marketplace add psnwd/getewise
 /plugin install gatewise@gatewise
 ```
-This installs all gateways. To install just one, use `payhere`, `onepay`, `webxpay`, `genie` or `koko` instead of `gatewise` in the second command.
+This installs all gateways. To install just one, use `payhere`, `onepay`, `webxpay`, `genie`, `koko`, `payment-basics`, `payment-testing`, `payment-refunds` or `payment-security-review` instead of `gatewise` in the second command.
 
 **Claude Code (manual copy)**
 
@@ -138,7 +143,7 @@ What the "without" answers got wrong: invented endpoints, a made-up signature sc
 
 ## Good to know
 
-- **Unofficial.** Gatewise isn't made by or affiliated with PayHere, OnePay, WebXPay, Genie Business (Dialog) or their banks. Names belong to their owners.
+- **Unofficial.** Gatewise isn't made by or affiliated with PayHere, OnePay, WebXPay, Genie Business (Dialog), Koko or their banks. Names belong to their owners.
 - **Docs change.** Notes come from each gateway's public docs (read October 2026). Fees, limits and policies can change, and each skill tells Claude to say so and send contract questions to the gateway.
 - **Gaps are flagged, not guessed.** When a gateway's docs are missing or contradict themselves, the skill lists it in `references/troubleshooting.md` and Claude is told to say so instead of inventing an answer.
 - **Test in sandbox first,** then go live. Never paste real secrets into chat.
