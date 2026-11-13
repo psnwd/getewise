@@ -5,6 +5,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions use `vX
 **Releasing:** move the `[Unreleased]` entries under a new `## [X.Y.Z] - YYYY-MM-DD` heading, bump the version in `package.json`, `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`, then `git tag vX.Y.Z && git push --tags`. The release workflow publishes that section as the release notes and attaches the `.skill` files.
 
 ## [Unreleased]
+
+## [0.4.0] - 2026-11-13
 ### Added
 - `COOKBOOK.md`: ten end-to-end recipes (PayHere checkout, Koko BNPL, WebXPay redirect, Genie webhooks, OnePay, recurring/saved cards, two-gateway failover, pre-launch review, refunds, adding a gateway), each with the prompt, the steps, and the rules the agent must not get wrong.
 - `INSTALL_FOR_AGENTS.md`: install steps written for an agent, with a hash-vector check and a question-based check that proves the skill loaded.

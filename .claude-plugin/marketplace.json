@@ -25,7 +25,7 @@
         "./genie"
       ],
       "description": "All Gatewise payment gateway skills: PayHere, OnePay, WebXPay, Genie Business and Koko (Sri Lanka), a router that picks one, and shared payment-basics, payment-security-review, payment-testing and payment-refunds.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "BlackCAT",
         "url": "https://github.com/psnwd"
@@ -43,7 +43,7 @@
         "./gatewise"
       ],
       "description": "Router: picks the right Sri Lankan gateway skill from the user's region, features and stack.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "BlackCAT",
         "url": "https://github.com/psnwd"
@@ -60,7 +60,7 @@
         "./payment-basics"
       ],
       "description": "Gateway-agnostic payment rules: idempotency, callback verification, reconciliation, PCI scope and secrets.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "BlackCAT",
         "url": "https://github.com/psnwd"
@@ -77,7 +77,7 @@
         "./payment-security-review"
       ],
       "description": "Evidence-based security review of payment integrations: forged callbacks, amount tampering, secret leaks, IDOR, refund abuse.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "BlackCAT",
         "url": "https://github.com/psnwd"
@@ -94,7 +94,7 @@
         "./payment-testing"
       ],
       "description": "Test plan for Sri Lankan gateways: sandbox hosts, published test cards, live-only gaps, scenario checklist.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "BlackCAT",
         "url": "https://github.com/psnwd"
@@ -111,7 +111,7 @@
         "./payment-refunds"
       ],
       "description": "Refunds, partial refunds and chargebacks across the Sri Lankan gateways, plus a safe refund endpoint design.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "BlackCAT",
         "url": "https://github.com/psnwd"
@@ -128,7 +128,7 @@
         "./payhere"
       ],
       "description": "PayHere (Sri Lanka): checkout, recurring, preapproval, refunds, SDKs, plugins, plans and troubleshooting.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "BlackCAT",
         "url": "https://github.com/psnwd"
@@ -145,7 +145,7 @@
         "./onepay"
       ],
       "description": "OnePay (Sri Lanka): redirect checkout, JS SDK, payment links, card on file, refunds, payouts, plugins.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "BlackCAT",
         "url": "https://github.com/psnwd"
@@ -162,7 +162,7 @@
         "./webxpay"
       ],
       "description": "WebXPay (Sri Lanka): RSA-encrypted checkout, Token V2 saved cards and MIT, gateway IDs, plugins, error codes.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "BlackCAT",
         "url": "https://github.com/psnwd"
@@ -179,7 +179,7 @@
         "./koko"
       ],
       "description": "Koko (Sri Lanka BNPL): RSA-signed orderCreate, signed callback verification, Order View API, troubleshooting.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "BlackCAT",
         "url": "https://github.com/psnwd"
@@ -196,7 +196,7 @@
         "./genie"
       ],
       "description": "Genie Business / Dialog Pay Business (Sri Lanka): hosted checkout, webhooks and signatures, card on file, MIT recurring, refunds, plugins.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "BlackCAT",
         "url": "https://github.com/psnwd"
