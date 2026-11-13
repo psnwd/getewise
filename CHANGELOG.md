@@ -5,6 +5,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/). Versions use `vX
 **Releasing:** move the `[Unreleased]` entries under a new `## [X.Y.Z] - YYYY-MM-DD` heading, bump the version in `package.json`, `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`, then `git tag vX.Y.Z && git push --tags`. The release workflow publishes that section as the release notes and attaches the `.skill` files.
 
 ## [Unreleased]
+### Added
+- Cross-agent install: `npx skills add psnwd/getewise` and `gh skill install psnwd/getewise <skill> --agent <agent>`, documented in the README and `INSTALL_FOR_AGENTS.md` (both commands tested against this repo).
+
+### Changed
+- `COOKBOOK.md` and `evals/README.md`: aligned with the 0.4.0 re-check — PayHere notifications are sent once (so reconciliation is required), PayHere partial refunds are contradictory and must be confirmed, Koko refunds are portal-only and full-only, WebXPay's return check is PSS/SHA-1.
 
 ## [0.4.0] - 2026-11-13
 ### Added

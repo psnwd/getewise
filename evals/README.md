@@ -77,7 +77,7 @@ Don't add cases that test internals ("did it read the reference file", "did it c
 ## Rules
 
 - **Facts come from the gateway's public docs.** A grader that asserts something the docs don't say is a bug in the eval.
-- **Include the gotchas.** The best cases are the ones where the base model is confidently wrong: OnePay's unsigned callback, Genie's body-less signature, Koko's field order, WebXPay's signature recovery.
+- **Include the gotchas.** The best cases are the ones where the base model is confidently wrong: OnePay's unsigned callback, Genie's body-less signature, Koko's field order, WebXPay's PSS/SHA-1 signature.
 - **Never put real credentials in a prompt.** Use placeholders; the skills are written to expect them.
 - **Regressions win.** If scores drop more than roughly 15% on pass rate, or time more than doubles, investigate the edit before shipping it.
 

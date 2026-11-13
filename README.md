@@ -72,7 +72,7 @@ Ten end-to-end workflows — checkout, BNPL, webhooks, recurring, two-gateway fa
 
 ## Install in 2 minutes
 
-Pick the one that matches how you use Claude.
+Pick the one that matches your tool.
 
 Installing on someone's behalf, or driving this from an agent? Follow [INSTALL_FOR_AGENTS.md](INSTALL_FOR_AGENTS.md); it is written as steps with a verification check.
 
@@ -103,8 +103,28 @@ Copy-Item -Recurse getewise\skills\* $env:USERPROFILE\.claude\skills\
 ```
 Want just one gateway? Copy only that folder, for example `skills/payhere`.
 
-**Other agents** (Cursor, Codex CLI, Gemini CLI...): copy the skill folder into that tool's skills directory. Each skill is a standard `SKILL.md` plus a `references/` folder.
+**Any agent, one command (`npx skills`)**
 
+```bash
+npx skills add psnwd/getewise
+```
+
+It detects the agents you have (Claude Code, Cursor, Codex, OpenCode, Gemini CLI and ~75 more), then asks which skills to install. Add `-g` to make them available in every project, or `--all` to skip the prompts. Needs Node.js 22.20+.
+
+```bash
+# one gateway, globally, non-interactive
+npx skills add psnwd/getewise --skill payhere -g -a claude-code -y
+```
+
+**Any agent, GitHub CLI (`gh skill`, v2.90+)**
+
+```bash
+gh skill install psnwd/getewise payhere --agent cursor --scope user
+```
+
+`gh skill install psnwd/getewise` lists the skills without installing; a name installs just that one. `gh skill update` and `npx skills update` bring them forward later.
+
+**Everything else:** copy the skill folder into your tool's skills directory. Each skill is a standard `SKILL.md` plus a `references/` folder.
 
 ## How it works
 

@@ -38,7 +38,7 @@ Nothing may be marked paid from the return page — only from the notification.
    It reads `PAYHERE_SECRET` from the environment, not the command line.
 3. **Writes the checkout form** to `https://sandbox.payhere.lk/pay/checkout` (sandbox) or `https://www.payhere.lk/pay/checkout` (live), with `notify_url`, `return_url` and `cancel_url`.
 4. **Writes the notify handler** in this order: raw form body → recompute `md5sig` → constant-time compare (`crypto.timingSafeEqual`) → load the order by *your* id → check amount, currency and merchant id against the DB → insert `(provider, gateway_ref)` under a unique constraint → fulfil only if the insert was new → 200.
-5. **Adds a reconciliation job** that pulls `pending` orders older than N minutes through the Retrieval API and settles them through the same function.
+5. **Adds a reconciliation job** that pulls `pending` orders older than N minutes through the Retrieval API and settles them through the same function. PayHere posts each notification once and does not retry, so this sweep is the safety net, not a nicety.
 6. **Replays the failure cases:** duplicate notify, notify before return, one flipped byte in `md5sig` (expect 400 and no state change).
 
 **Tips:**
@@ -291,7 +291,7 @@ PayHere for cards, Koko for installments.
 
 ## Recipe 9 — Refunds that cannot pay out twice
 
-**What it does:** A staff-only partial refund endpoint with a cap computed inside a DB transaction, plus per-gateway reality checks (OnePay is live-only, WebXPay and Koko have no public refund API).
+**What it does:** A staff-only partial refund endpoint with a cap computed inside a DB transaction, plus per-gateway reality checks (OnePay is live-only, WebXPay has no public refund API, Koko is portal-only and full-only).
 
 **What you say:**
 
@@ -305,14 +305,15 @@ It must be impossible to refund more than was paid.
 1. **Reads [payment-refunds](skills/payment-refunds/SKILL.md)** for the matrix, plus the gateway's own refund reference for the exact request shape.
 2. **Builds the endpoint:** authenticated and audited, order loaded by your id, cap `sum(refunds) + requested <= paid` inside a row lock, amount in the gateway's expected unit.
 3. **Writes the refund row first** (`order, amount, reason, status=requested`) so a retry or double-click reuses it.
-4. **Calls the gateway:** PayHere `POST /merchant/v1/payment/refund` with `payment_id` **or** `authorization_token` (one only) plus optional `amount`; Genie `POST /public/transactions/{id}/refunds` with `refundAmount` and `refundReason`, after checking `canPartialRefundIfConfirmed`.
+4. **Calls the gateway:** PayHere `POST /merchant/v1/payment/refund` with `payment_id` **or** `authorization_token` (one only) plus `description`; Genie `POST /public/transactions/{id}/refunds` with `refundAmount` and `refundReason`, after checking `canPartialRefundIfConfirmed`.
 5. **Settles forward-only:** `paid -> refund_requested -> refunded`, only from a verified state change, never from the API's "requested" response alone.
 6. **Does the business side once**, after the refund is accepted: restock, revoke licence, cancel subscription.
 
 **Tips:**
 
-- Genie's `refundAmount` unit is not documented. Test small on UAT and confirm with Genie before writing the cap logic.
-- OnePay allows one active refund per transaction and rejects sandbox refunds. WebXPay and Koko have no public refund API — use the portal and record it manually.
+- PayHere's partial refunds are contradictory in its own docs: the Refund API ships a "For partial refunds" sample with `amount`, while the refund-process page describes full refunds only. The agent flags it and tells you to confirm with PayHere support before shipping partials.
+- Genie's `refundAmount` is a number, decimals accepted, but the unit is not documented. Test small on UAT and confirm with Genie before writing the cap logic.
+- OnePay allows one active refund per transaction and rejects sandbox refunds. WebXPay has no public refund API; Koko's is portal-only and full-only, and the commission comes back while the processing fee does not. Record portal refunds manually.
 - A disputed payment should not also be refunded. Ask the gateway for the chargeback status first.
 - Never promise refund timing. Banks settle on their own schedule.
 

@@ -39,19 +39,54 @@ Copy-Item -Recurse getewise\skills\* $env:USERPROFILE\.claude\skills\
 
 One gateway is enough for most users: copy only that folder, e.g. `skills/payhere`.
 
-**Other agents (Cursor, Codex CLI, Gemini CLI, ...)**
+**Any agent, one command (`npx skills`)**
 
-Each skill is a standard `SKILL.md` plus `references/` and optional `scripts/`. Copy the skill folder into that tool's skills directory, keeping the folder name (`payhere`, `onepay`, ...). Ask the user where their tool expects skills if it is not obvious; do not invent a path.
+```bash
+npx skills add psnwd/getewise
+```
+
+Needs Node.js 22.20+. The CLI detects installed agents; an interactive run asks which skills go to which agent. Non-interactive forms:
+
+```bash
+npx skills add psnwd/getewise --all -y                          # every skill, every detected agent
+npx skills add psnwd/getewise --skill payhere -a claude-code -g -y # one skill, global, all projects
+```
+
+Project install (the default) writes the skills to `.agents/skills/` and records them in `skills-lock.json`; `-g` installs user-wide instead. On Windows it copies rather than links by default; `--copy` forces copies anywhere.
+
+**GitHub CLI (`gh skill`, v2.90+)**
+
+```bash
+gh skill install psnwd/getewise                                  # list skills in the repo
+gh skill install psnwd/getewise payhere --agent cursor --scope user
+gh skill install psnwd/getewise --all --agent claude-code        # everything, project scope
+gh skill preview psnwd/getewise payhere                          # read one before installing
+```
+
+`gh` discovers `skills/<name>/SKILL.md` automatically. `--pin vX.Y.Z` installs a release tag; default scope is project, default agent under `--yes` is `github-copilot`, so always pass `--agent`.
+
+**Other agents (manual)**
+
+Copy the skill folder into that tool's skills directory, keeping the folder name. Ask the user where their tool expects skills if it is not obvious; do not invent a path.
 
 **Claude.ai (web or desktop)**
 
-The user must do this one by hand: download the gateway from the latest GitHub Release (or build it with `python scripts/package.py` into `dist/`) (for example `payhere.skill`), then Settings → Capabilities → Skills → upload. Offer the file path and stop.
+The user must do this one by hand: download `payhere.skill` (or whichever gateway they want) from the latest GitHub Release, or build it locally with `python scripts/package.py` into `dist/`. Then Settings → Capabilities → Skills → upload, and start a chat. Give them the file path and stop here.
 
 ## Step 2 — Verify
 
-Two checks, cheapest first.
+Three checks, cheapest first.
 
-**a) The helper scripts still work.** From the repo root:
+**a) The skills landed.**
+
+```bash
+npx skills list                 # installed skills, with source
+npx skills add psnwd/getewise --list   # what the repo offers, without installing
+```
+
+Expect ten: `gatewise`, `payhere`, `onepay`, `webxpay`, `genie`, `koko`, `payment-basics`, `payment-testing`, `payment-refunds`, `payment-security-review`. For `gh`, `gh skill install psnwd/getewise` prints the same list.
+
+**b) The helper scripts still work.** From the repo root:
 
 ```bash
 python skills/payhere/scripts/payhere_sign.py hash \
@@ -64,9 +99,9 @@ Expect exactly:
 157365BBAF81B09B3FEC1749C1ED915D
 ```
 
-If the user installed from the marketplace rather than a clone, skip this and go to (b).
+If the user installed via a plugin, `npx skills` or `gh skill` rather than a clone, skip this and go to (c).
 
-**b) A question only the skill gets right.** Ask the agent (yourself):
+**c) A question only the skill gets right.** Ask the agent (yourself):
 
 > "My PayHere `notify_url` never fires when I test locally. What's wrong?"
 
@@ -94,9 +129,14 @@ Point them at [COOKBOOK.md](COOKBOOK.md) for full workflows.
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Agent answers PayHere questions from memory | Skill folder is nested one level too deep | `SKILL.md` must sit directly in `~/.claude/skills/<name>/` |
-| Only one gateway works | Only that plugin was installed | Install `gatewise@gatewise` or copy all of `skills/*` |
+| Agent answers PayHere questions from memory | Skill folder is nested one level too deep | `SKILL.md` must sit directly in `~/.claude/skills/<name>/` (or the tool's skills dir) |
+| Only one gateway works | Only that plugin or `--skill` was installed | Install `gatewise@gatewise`, `npx skills add psnwd/getewise --all`, or copy all of `skills/*` |
 | Wrong gateway chosen for a "which gateway" question | Router not installed | Install the `gatewise` skill too |
+| `npx skills add` reports no skills | Node older than 22.20, or run outside the repo source | Upgrade Node; the repo uses the standard `skills/<name>/SKILL.md` layout |
+| `npx skills` installs into the wrong place | Project scope is the default | Re-run with `-g` for user-wide, or `--agent` to target one tool |
+| Symlink errors on Windows | Developer Mode off | Add `--copy` |
+| `gh skill` command missing | GitHub CLI older than v2.90 | `gh extension upgrade --all` or update `gh` |
+| `gh skill install` ignores the agent | Default agent under `--yes` is `github-copilot` | Always pass `--agent claude-code` (or your tool) |
 | `payhere_sign.py` output differs | Wrong secret or reformatted amount | Amount must be two decimals, no thousands separators; secret from env |
 | `verify.py` skips RSA tests | `cryptography` missing | `pip install cryptography` |
 
