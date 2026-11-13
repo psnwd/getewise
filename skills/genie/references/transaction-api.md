@@ -61,7 +61,7 @@ Amount is an integer in minor units, so this is LKR 5.00. A fuller example:
 | `paymentPortalExperience{}` | `externalWebsiteTermsAccepted`, `externalWebsiteTermsUrl`, `skipCustomerForm`, `skipProviderSelection` (then `provider` is required), `hideTermsAndConditions`, `addCardToVault`, `allowRetry` |
 | `preferredSubscriptionPlan` | plan code, if your company has multiple plans, to apply the right MDR |
 | `locationId` | shop/location ID to use a different MCC or link a shop |
-| `order{shopId, products[], orderFields[]}` | first/second request variants: create an order with the transaction (shop ID and products required) |
+| `order{shopId, products[], orderFields[]}` | first/second request variants: create an order with the transaction (shop ID and products required). Each `products[]` item takes `sku` + `numberOfItems` (spec-mock), not `productId`/`quantity`. The spec-mock also reports `required property 'order'` for a bare `{amount, currency}` body — a mock artefact; the API and the official SDK post amount + currency only |
 | `invoicePrefix`, `paymentDue`, `taxInformation`, `taxId` | invoicing module |
 
 ## 4. Response fields that matter
@@ -85,10 +85,15 @@ Amount is an integer in minor units, so this is LKR 5.00. A fuller example:
 Many other fields are marked "internal logic" in the docs; ignore them.
 
 ## 5. Get Transaction
-`GET {base}/public/transactions/{transactionId}` with the same `Authorization` header. Returns the same object. The docs call this check mandatory before you treat a payment as done. Note the path: the Stoplight page shows `/public/transactions/{id}` while the webhook guide's sample calls `/public/v2/transactions/{id}`. See `troubleshooting.md`; try the documented one, fall back to the other, or confirm with support.
+`GET {base}/public/transactions/{transactionId}` with the same `Authorization` header. Returns the same object. The docs call this check mandatory before you treat a payment as done.
+
+The path is `/public/transactions/{id}`, **not** V2: the spec-mock resolves it (401, auth required) and returns "Route not resolved, no path matched" for `/public/v2/transactions/{id}` (spec-mock); the official SDK's `Transactions::get()` calls `transactions/{id}` under `/public/` (official SDK). The `/public/v2/transactions/{id}` form appears only in the webhook page's Node sample — a typo. Create stays `POST /public/v2/transactions`.
 
 ## 6. Hosted-page behaviour
 - Customer opens `url`, picks a method (unless `skipProviderSelection`), pays, and is sent to `redirectUrl`.
 - A pending transaction sits in `QR_CODE_GENERATED` even for cards and redirect wallets.
 - Failed attempts: with `allowRetry` the transaction is cancelled on failure and a webhook is sent; otherwise the hosted page offers a retry.
-- Payment links can also be shared by SMS or email through two dedicated endpoints (see the Transactions group in Stoplight).
+- Payment links can also be shared by SMS or email:
+  - `POST {base}/public/transactions/{transactionId}/send-sms` with `{ "mobile": "..." }`
+  - `POST {base}/public/transactions/{transactionId}/send-email` with a list of addresses
+  - Both are rate-limited to **once per minute per transaction**; a second call gets `429`.

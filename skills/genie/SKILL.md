@@ -1,18 +1,18 @@
 ---
 name: genie
-description: Expert knowledge of Genie Business (Dialog Pay Business, geniebiz.lk, "Genie Business Connect"), Dialog's Sri Lankan payment gateway, covering code integration AND account/support questions. Use whenever the user mentions Genie, Genie Business, Genie Business Connect, Dialog Pay, geniebiz.lk, api.geniebiz.lk, api.uat.geniebiz.lk, geniebusiness.lk, PomeloPay (its X-Originator header), NOTIFY_TRANSACTION_CHANGE, X-Signature-Nonce, or wants to accept Visa/Mastercard/Amex cards, Genie wallet, eZ Cash, UPI, Alipay or JustPay in Sri Lanka through Dialog, even if they only describe a payment link, hosted payment page, card on file, merchant-initiated recurring charge or refund on that platform. Covers Create/Get Transaction V2, webhooks and signature verification, tokenization and MIT recurring payments, refunds and transaction states in Node/TypeScript, Go, Python, PHP/Laravel, Rust, Java and C#; WooCommerce and OpenCart plugins; sandbox (UAT) vs production; and doc gaps and contradictions.
+description: Expert knowledge of Genie Business (Dialog Pay Business, geniebiz.lk, "Genie Business Connect"), Dialog's Sri Lankan payment gateway, covering code integration AND account/support questions. Use whenever the user mentions Genie, Genie Business, Genie Business Connect, Dialog Pay, geniebiz.lk, api.geniebiz.lk, api.uat.geniebiz.lk, geniebusiness.lk, PomeloPay (its X-Originator header), NOTIFY_TRANSACTION_CHANGE, X-Signature-Nonce, or wants to accept Visa/Mastercard/UnionPay/Amex cards, Genie wallet, eZ Cash, UPI, Alipay or JustPay in Sri Lanka through Dialog, even if they only describe a payment link, hosted payment page, card on file, merchant-initiated recurring charge or refund on that platform. Covers Create/Get Transaction V2, webhooks and signature verification, tokenization and MIT recurring payments, refunds and transaction states in Node/TypeScript, Go, Python, PHP/Laravel, Rust, Java and C#; WooCommerce and OpenCart plugins; sandbox (UAT) vs production; and doc gaps and contradictions.
 ---
 
 # Genie Business (Dialog Pay Business)
 
-Genie Business is Dialog's payment gateway for Sri Lankan merchants: cards (Visa, Mastercard, Amex) and wallets/QR (Genie, eZ Cash, UPI, Alipay, JustPay), local and foreign currency, hosted payment pages and payment links. The developer API is "Genie Business Connect" (REST + JSON, v2.0). This skill packs the public docs (geniebusiness.stoplight.io, geniebusiness.lk/developer, the WordPress plugin page, read Oct 2026). The public docs are partly auto-generated and have gaps; `references/troubleshooting.md` lists them. Flag them, don't paper over them.
+Genie Business is Dialog's payment gateway for Sri Lankan merchants: cards (Visa, Mastercard, UnionPay, Amex) and wallets/QR (Genie, eZ Cash, UPI, Alipay, JustPay), local and foreign currency, hosted payment pages and payment links. The developer API is "Genie Business Connect" (REST + JSON, v2.0). This skill packs the public docs (geniebusiness.stoplight.io, geniebusiness.lk/developer, the WordPress plugin page, re-checked Nov 2026). The public docs are partly auto-generated and have gaps; `references/troubleshooting.md` lists them. Flag them, don't paper over them.
 
 ## How to use this skill
 1. Pick the task from the routing table.
 2. Read only the matching reference file(s).
 3. For code, start from `references/code-examples.md` and adapt to the user's stack.
 4. Use `scripts/genie_webhook.py` to compute or check a webhook `X-Signature`.
-5. Say that fees, limits and policies are not in the public docs; send those to Genie support (see `references/environments-account.md`).
+5. Fees, settlement and plans are on the pricing page (table in `references/environments-account.md`); limits and minimum amount are not published — send those to Genie support.
 
 ## Routing table
 | User needs | Read |
@@ -53,8 +53,8 @@ Genie Business is Dialog's payment gateway for Sri Lankan merchants: cards (Visa
   ```
 - If the goal is ambiguous (hosted page vs payment link vs recurring), state the assumption and proceed.
 - Show a full flow: create order > create transaction (minor units) > redirect to `url` > webhook with signature check > Get Transaction > idempotent DB update > status page from the DB.
-- Flag contradictions listed in `troubleshooting.md` (Get Transaction path, `expiryDate` format, `recurringFrequency` values, refund unit) instead of silently choosing; tell the user to confirm with Genie support or in the Stoplight "Try it" console.
-- Anything not in the references (endpoint paths for Customer, Charge Stored Token, Create Webhook, FX): say so, point to the Stoplight group, don't invent.
+- Flag contradictions listed in `troubleshooting.md` (`expiryDate` format, `recurringFrequency` values, refund amount unit, webhook timestamp) instead of silently choosing; tell the user to confirm with Genie support or in the Stoplight "Try it" console.
+- Anything not in the references (Create Customer body, capture of `AUTHORIZED`, FX, the Charge Stored Token host): say so, point to the Stoplight group, don't invent.
 - Secrets from env vars, never in code you output.
 
 ## Bundled files

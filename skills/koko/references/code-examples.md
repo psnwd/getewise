@@ -94,20 +94,26 @@ func kokoVerify(pub *rsa.PublicKey, orderID, trnID, status, sigB64 string) bool 
 `dataString = _mId + _pluginName + _pluginVersion + _orderId + api_key`, sign the same way, POST fields `_mId, api_key, _orderId, _pluginName, _pluginVersion, signature` form-encoded to `{host}/api/merchants/orderView`.
 
 # `_responseUrl` handlers by framework
-All follow the same steps: verify Koko signature > load order by `orderId` > skip if already paid > mark paid, store `trnId` > 200. `markPaid` must be idempotent (Koko may retry). Exempt the route from CSRF/auth middleware.
+All follow the same steps: verify Koko signature > load order by `orderId` > skip if already paid > mark paid, store `trnId` > **200**. `markPaid` must be idempotent (Koko may retry). Exempt the route from CSRF/auth middleware.
+
+Koko sends the callback as JSON **or** form-encoded. Parse both. On any failure — missing/invalid signature, unknown order, exception — log it and still answer `200`: a non-200 makes Koko retry.
 
 ## Express
 ```ts
 import express from "express";
 import { kokoVerify } from "./koko";            // from Node example above
 
-app.post("/koko/response", express.urlencoded({ extended: false }), async (req, res) => {
-  const { orderId, trnId, status, signature } = req.body;
-  if (!kokoVerify(orderId, trnId, status, signature)) return res.sendStatus(400);
-  const order = await db.orders.find(orderId);
-  if (!order) return res.sendStatus(404);
-  if (status === "SUCCESS" && order.status !== "paid") await db.orders.markPaid(orderId, trnId);
-  res.sendStatus(200);
+app.post("/koko/response", express.json(), express.urlencoded({ extended: false }), async (req, res) => {
+  try {
+    const { orderId, trnId, status, signature } = req.body ?? {};
+    if (kokoVerify(String(orderId ?? ""), String(trnId ?? ""), String(status ?? ""), String(signature ?? ""))) {
+      const order = await db.orders.find(orderId);
+      if (order && status === "SUCCESS" && order.status !== "paid") await db.orders.markPaid(orderId, trnId);
+    }
+  } catch (e) {
+    console.error("koko callback", e);
+  }
+  res.sendStatus(200);                            // always 200
 });
 ```
 
@@ -117,13 +123,20 @@ app.post("/koko/response", express.urlencoded({ extended: false }), async (req, 
 import { kokoVerify } from "@/lib/koko";
 
 export async function POST(req: Request) {
-  const f = await req.formData();
-  const [orderId, trnId, status, sig] = ["orderId", "trnId", "status", "signature"].map((k) => String(f.get(k) ?? ""));
-  if (!kokoVerify(orderId, trnId, status, sig)) return new Response(null, { status: 400 });
-  const order = await db.orders.find(orderId);
-  if (!order) return new Response(null, { status: 404 });
-  if (status === "SUCCESS" && order.status !== "paid") await db.orders.markPaid(orderId, trnId);
-  return new Response(null, { status: 200 });
+  try {
+    const ct = req.headers.get("content-type") ?? "";
+    const f: Record<string, unknown> = ct.includes("application/json")
+      ? await req.json().catch(() => ({}))
+      : Object.fromEntries((await req.formData()).entries());
+    const [orderId, trnId, status, sig] = ["orderId", "trnId", "status", "signature"].map((k) => String(f[k] ?? ""));
+    if (kokoVerify(orderId, trnId, status, sig)) {
+      const order = await db.orders.find(orderId);
+      if (order && status === "SUCCESS" && order.status !== "paid") await db.orders.markPaid(orderId, trnId);
+    }
+  } catch (e) {
+    console.error("koko callback", e);
+  }
+  return new Response("OK", { status: 200 });     // always 200
 }
 ```
 
@@ -132,48 +145,56 @@ export async function POST(req: Request) {
 // routes/web.php: Route::post('/koko/response', [KokoController::class, 'response']);
 // add 'koko/response' to VerifyCsrfToken::$except
 public function response(Request $r) {
-    $data = $r->orderId . $r->trnId . $r->status;
-    $ok = openssl_verify($data, base64_decode($r->signature), config('services.koko.public_key'), OPENSSL_ALGO_SHA256) === 1;
-    if (!$ok) return response('', 400);
-    $order = Order::find($r->orderId);
-    if (!$order) return response('', 404);
-    if ($r->status === 'SUCCESS' && $order->status !== 'paid') $order->update(['status' => 'paid', 'trn_id' => $r->trnId]);
-    return response('', 200);
+    $in = $r->isJson() ? $r->json() : $r->all();
+    $data = ($in['orderId'] ?? '') . ($in['trnId'] ?? '') . ($in['status'] ?? '');
+    $ok = openssl_verify($data, base64_decode($in['signature'] ?? ''), config('services.koko.public_key'), OPENSSL_ALGO_SHA256) === 1;
+    if ($ok) {
+        $order = Order::find($in['orderId'] ?? null);
+        if ($order && $in['status'] === 'SUCCESS' && $order->status !== 'paid') $order->update(['status' => 'paid', 'trn_id' => $in['trnId']]);
+    }
+    return response('OK', 200);                   // always 200
 }
 ```
 
 ## FastAPI
 ```python
-from fastapi import FastAPI, Form, HTTPException
+from fastapi import FastAPI, Request
 app = FastAPI()
 
 @app.post("/koko/response")
-def koko_response(orderId: str = Form(...), trnId: str = Form(...), status: str = Form(...), signature: str = Form(...)):
-    if not koko_verify(orderId, trnId, status, signature):   # from Python example above
-        raise HTTPException(400)
-    order = db.get_order(orderId)
-    if not order:
-        raise HTTPException(404)
-    if status == "SUCCESS" and order.status != "paid":
-        db.mark_paid(orderId, trnId)
-    return {}
+async def koko_response(request: Request):
+    try:
+        ct = request.headers.get("content-type", "")
+        body = await request.json() if "application/json" in ct else dict(await request.form())
+    except Exception:
+        body = {}
+    try:
+        p = {k: str(body.get(k, "")) for k in ("orderId", "trnId", "status", "signature")}
+        if koko_verify(p["orderId"], p["trnId"], p["status"], p["signature"]):   # from Python example above
+            order = db.get_order(p["orderId"])
+            if order and p["status"] == "SUCCESS" and order.status != "paid":
+                db.mark_paid(p["orderId"], p["trnId"])
+    except Exception as e:
+        print("koko callback", e)
+    return {}                                      # always 200
 ```
-(Needs `python-multipart` for `Form`.)
+(Needs `python-multipart` for `request.form()`.)
 
 ## Django
 ```python
 @csrf_exempt
 @require_POST
 def koko_response(request):
-    p = request.POST
-    if not koko_verify(p.get("orderId", ""), p.get("trnId", ""), p.get("status", ""), p.get("signature", "")):
-        return HttpResponse(status=400)
-    order = Order.objects.filter(pk=p["orderId"]).first()
-    if not order:
-        return HttpResponse(status=404)
-    if p["status"] == "SUCCESS" and order.status != "paid":
-        order.mark_paid(p["trnId"])
-    return HttpResponse(status=200)
+    try:
+        body = json.loads(request.body) if request.content_type == "application/json" else request.POST
+        p = {k: str(body.get(k, "")) for k in ("orderId", "trnId", "status", "signature")}
+        if koko_verify(p["orderId"], p["trnId"], p["status"], p["signature"]):
+            order = Order.objects.filter(pk=p["orderId"]).first()
+            if order and p["status"] == "SUCCESS" and order.status != "paid":
+                order.mark_paid(p["trnId"])
+    except Exception:
+        logger.exception("koko callback")
+    return HttpResponse("OK", status=200)          # always 200
 ```
 
 # Reconciliation job (missing `_responseUrl` callbacks)
@@ -191,18 +212,20 @@ async function kokoOrderView(orderId: string) {
   const res = await fetch(`${process.env.KOKO_HOST}/api/merchants/orderView`, {
     method: "POST", body: new URLSearchParams({ ...f, signature }),   // form-encoded
   });
-  return res.ok ? await res.json() : null;      // { orderId, trnId, status, desc, signature }
+  return res.ok ? await res.json() : null;      // { content: { orderId, trnId, status, desc, signature }, status, statusCode }
 }
 
 export async function reconcileKoko() {
   const cutoff = new Date(Date.now() - 10 * 60_000);          // callback grace period
   for (const o of await db.orders.pendingBefore("koko", cutoff)) {
     const r = await kokoOrderView(o.id);
-    if (!r || r.orderId !== o.id) continue;                    // retry next run
-    // ponytail: signed string for the response is assumed orderId+trnId+status (PDF is silent); drop this check if Koko confirms otherwise
-    if (!kokoVerify(r.orderId, r.trnId, r.status, r.signature)) continue;
-    if (r.status === "SUCCESS") await db.orders.markPaid(o.id, r.trnId);        // idempotent
-    else if (r.status === "FAILED") await db.orders.markFailed(o.id);
+    const c = r?.content;
+    if (!c || c.orderId !== o.id) continue;                    // retry next run
+    // Koko's own plugin never verifies the response signature; signed string is unknown.
+    // If you verify, it is assumed orderId+trnId+status — drop the check if Koko confirms otherwise.
+    if (!kokoVerify(c.orderId, c.trnId, c.status, c.signature)) continue;
+    if (c.status === "SUCCESS") await db.orders.markPaid(o.id, c.trnId);        // idempotent
+    else if (c.status === "FAILED") await db.orders.markFailed(o.id);
     // PENDING: leave; give up (expire) after your own max age
   }
 }

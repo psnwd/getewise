@@ -4,31 +4,37 @@
 
 | Env | Host |
 |---|---|
-| Dev | `https://devapi.paykoko.com` |
+| Dev | `https://devapi.paykoko.com` (separate merchant registry; QA/prod credentials do not work here) |
 | QA | `https://qaapi.paykoko.com` |
 | Prod | `https://prodapi.paykoko.com` |
 
 Merchant ID (`_mId`), `api_key` and the key pair exchange (you give Koko your public key; you get Koko's public key) come from Koko onboarding.
 
+**Auth is form fields only:** `_mId` + `api_key`. There is no auth header, Basic or otherwise — both `orderCreate` and `orderView` accept unauthenticated HTTP requests and authenticate purely from the signed payload. `api_key` is sent **plaintext** and compared literally.
+
+`_mId` is a 32-char lowercase hex id (e.g. `c8cca514bdfa0582cdc40c9703c71e9d`); a non-hex value returns `corruptted entity ID` (Koko's spelling).
+
 ## Fields
 | Field | Notes |
 |---|---|
-| `_mId` | Merchant ID |
-| `api_key` | Merchant API key (signed, sent in form) |
+| `_mId` | Merchant ID, 32-char lowercase hex |
+| `api_key` | Merchant API key, plaintext form field (signed, sent in form) |
 | `_returnUrl` | Browser redirect after payment: `orderId, trnId, status` |
 | `_cancelUrl` | Browser redirect on cancel: status `CANCELED` |
 | `_responseUrl` | Server-to-server POST with signed result |
 | `_amount` | Decimal string, e.g. `300.00` |
 | `_currency` | `LKR` |
-| `_reference` | Your reference |
+| `_reference` | Your reference (free-form; need not equal `_orderId`) |
 | `_orderId` | Unique per request |
-| `_pluginName` | `customapi` |
+| `_pluginName` | `customapi` (custom integrations) |
 | `_pluginVersion` | Your version string, e.g. `1.0.1` |
 | `_description` | Order description |
 | `_firstName`, `_lastName`, `_email` | Customer |
-| `_mobileNo` | Used in Koko's PHP samples, not part of `dataString` |
+| `_mobileNo` | Posted in the form, **not** part of `dataString`; whether it is required is unresolved |
 | `dataString` | See below |
 | `signature` | base64 RSA-SHA256 of `dataString` |
+
+`_pluginName` + `_pluginVersion` are matched server-side against the plugin registration Koko holds for your MID. A mismatch fails with `OnlineOrder.create.merchantPluginDetail.apiKey.invalid` even when the key is valid (e.g. sending `woocommerce`/`8.6.0` against a registration of `customapi`/`1.0`). Confirm both values with Koko at onboarding; they are not free-form.
 
 ## dataString (exact order, no separators)
 ```

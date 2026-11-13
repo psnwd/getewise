@@ -12,5 +12,5 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install cryptography
-      - name: Skills, references, evals, helpers, manifests and dist agree
+      - name: Skills, references, evals, helpers, manifests agree
         run: python scripts/verify.py

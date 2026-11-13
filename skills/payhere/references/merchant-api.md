@@ -14,14 +14,15 @@ All live under `/merchant/v1/`. Hosts: Live `https://www.payhere.lk`, Sandbox `h
 9. Common errors
 
 ## 1. Auth setup
-1. Dashboard > Settings > API Keys > Create API Key: app name + comma-separated whitelisted domains; tick the permission (e.g. "Automated Charging API"); save; View Credentials for **App ID** and **App Secret**.
-   - Capture API docs call this "Business Apps" with the "Payment Capture API" permission; the UI may label it either way. Tick every permission your integration needs.
-2. Authorization code = `base64(APP_ID + ":" + APP_SECRET)`. Compute in code, never on a public website.
-3. Token: `POST /merchant/v1/oauth/token`
+1. Dashboard > **Settings > API Keys** > Create API Key: app name + comma-separated whitelisted domains; tick the permission; save; **View Credentials** for **App ID** and **App Secret**.
+   - Permission split per docs: **Charging, Retrieval, Subscription Manager, Refund** → "Automated Charging API". **Capture** → **Settings > Business Apps** > "Create App", tick "Payment Capture API", "Add Business App", "View Credential". The Refund page calls the same object "the Business App in Step 1", so the labels drift; tick every permission your integration needs.
+2. **Merchant ID / Merchant Secret** are not under Settings: **Side Menu > Integrations** > "Add Domain/App" > "Request to Allow" > approval "up to 24 hours" > copy the secret (per domain/app, per environment). Repeats `checkout-api.md` §1.
+3. Authorization code = `base64(APP_ID + ":" + APP_SECRET)`. Compute in code, never on a public website.
+4. Token: `POST /merchant/v1/oauth/token`
    - Headers: `Authorization: Basic <code>`, `Content-Type: application/x-www-form-urlencoded`
    - Body: `grant_type=client_credentials`
-   - Response: `{access_token, token_type: "bearer", expires_in: 599, scope: "SANDBOX"}`. Token lives ~10 minutes: cache it and refresh on expiry/`invalid_token`.
-4. Call APIs with `Authorization: Bearer <access_token>`.
+   - Response: `{access_token, token_type: "bearer", expires_in: 599, scope: "SANDBOX"}`. Token lives ~10 minutes: cache it and refresh on expiry/`invalid_token`. No `test`/`live` flag exists; the environment is the host plus the credentials, and the scope string is the only echoed hint.
+5. Call APIs with `Authorization: Bearer <access_token>`.
 
 ## 2. Rate limit & live restrictions
 - Max **20 requests per 10 seconds** on `/merchant/v1/*`.
@@ -53,6 +54,8 @@ Returns `data[]` of successful payments for that order_id (PayHere does not enfo
 - Top-level `status`: 1 ok, 0 pending, -1 no records ("No payments found"), -2 declined.
 - `data[].status`: `RECEIVED`, `REFUND REQUESTED`, `REFUND PROCESSING`, `REFUNDED`, `CHARGEBACKED`.
 - Only successful payments are returned.
+- The sample's `customer` object carries the typo `fist_name` (same as Subscription Manager), so read it defensively.
+- This endpoint is the only reconciliation fallback for a missed notify: there is no re-send API (`troubleshooting.md` §2).
 
 ## 5. Subscription Manager API (for Recurring API subscriptions)
 - List: `GET /merchant/v1/subscription`
@@ -61,14 +64,16 @@ Returns `data[]` of successful payments for that order_id (PayHere does not enfo
 - Retry failed: `POST /merchant/v1/subscription/retry` body `{"subscription_id": 420075032251}` (error "not eligible for retrying" if not failed or already cancelled)
 - Cancel: `POST /merchant/v1/subscription/cancel` body `{"subscription_id": ...}` (errors if already cancelled/completed)
 Top-level `status`: 1 success, -1 failure (read `msg`). Subscription `status`: `ACTIVE`, `COMPLETED`, `FAILED`.
-Note: response keys use the misspelling `fist_name` under `customer`.
+Note: response keys use the misspelling `fist_name` under `customer` (also true of the Retrieval API's `customer` objects, §4).
 
 ## 6. Refund API
 `POST /merchant/v1/payment/refund` (JSON)
 - Refund a payment: `{"payment_id":"320027150501","description":"reason"}` 
 - Refund an authorization (hold): `{"authorization_token":"...","description":"reason"}`
-- Pass only one of payment_id / authorization_token. Optional `"amount":"100.50"` for a partial refund.
+- Pass only one of payment_id / authorization_token.
+- Partial refunds: undocumented as optional or required. The API page has a "For partial refunds" sample adding `"amount": "100.50"` ("Partial refund amount") and nothing else; the Refund Process page says "PayHere supports only full refunds". Verify with support before relying on it.
 Success: `{status:1, msg:"Successfully processed the refund", data:<refund number>}` (authorization refund returns `data:null`). Status: 1 ok, 0 error initiating, -1 failed (see msg). Invalid id: "Error processing refund".
+**Doc bugs on this page**: the text calls the response field `status_code` but the JSON key is `status`; the full-refund sample is invalid JSON (trailing comma after `authorization_token`) and sets both `payment_id` and `authorization_token` despite the text saying to remove one. Send valid JSON.
 
 ## 7. Capture API (Hold on Card)
 `POST /merchant/v1/payment/capture`
@@ -82,7 +87,7 @@ Needs the "Payment Capture API" permission on the key. Business rules (7-day win
 ## 8. Authorize API (customer authorizes a hold)
 Redirect form POST to Live `https://www.payhere.lk/pay/authorize`, Sandbox `https://sandbox.payhere.lk/pay/authorize`. Params and hash identical to Checkout (amount required).
 Notification extras: `authorization_token`, `status_code` of **3 = authorization success**, 0 pending, -1 canceled, -2 failed.
-**Doc inconsistency**: the official PHP sample tests `status_code == 2` after md5sig verification, but the table says success is `3`. Trust the table: treat `3` as authorized, and log unexpected codes.
+**Doc inconsistency**: the official PHP sample on the *same page* still tests `status_code == 2` after md5sig verification (as of 13 Nov 2026), but the status table says success is `3`. Trust the table: treat `3` as authorized, and log unexpected codes.
 `AUTHORIZE` via the Charging API (token-based) is live-only.
 
 ## 9. Common errors (all merchant APIs)

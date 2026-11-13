@@ -6,7 +6,6 @@
 3. Every evals/<name>/ case has prompt.md + case.yaml + graders.
 4. Each gateway's signing helper still reproduces its known test vector.
 5. Plugin manifests are valid JSON and list every skill.
-6. dist/*.skill files match skills/ (run `python scripts/package.py` if not).
 7. README lists every skill.
 8. Relative links in Markdown files resolve.
 9. No private keys or live-looking secrets are committed.
@@ -77,26 +76,32 @@ else:
     else: ok("genie webhook signature vector (valid accepted, tampered rejected)")
 try:
     import base64
-    from cryptography.hazmat.primitives.asymmetric import rsa
-    from cryptography.hazmat.primitives import serialization
-    key = rsa.generate_private_key(public_exponent=65537, key_size=1024)
-    pub = key.public_key()
+    from cryptography.hazmat.primitives.asymmetric import rsa, padding
+    from cryptography.hazmat.primitives import hashes, serialization
     import tempfile, os
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    pub = key.public_key()
     fd, tmpname = tempfile.mkstemp(suffix=".pem"); os.close(fd); tmp = Path(tmpname)
     tmp.write_bytes(pub.public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo))
-    pay = b"12001|T372016I24522|2016-04-20 09:57:52|00|Approved|40"
+    pay = b"12001|T372016I24522|2016-04-20 09:57:52|00|Approved|40|10.00|10.00"
+    # Current scheme: RSA-PSS / SHA-1, 20-byte salt (what the official Node/.NET samples verify).
+    pss = key.sign(pay, padding.PSS(mgf=padding.MGF1(hashes.SHA1()), salt_length=20), hashes.SHA1())
+    r = run("skills/webxpay/scripts/webxpay_crypto.py", "verify", "--key", str(tmp),
+            "--payment", base64.b64encode(pay).decode(), "--signature", base64.b64encode(pss).decode())
+    bad = run("skills/webxpay/scripts/webxpay_crypto.py", "verify", "--key", str(tmp),
+              "--payment", base64.b64encode(b"x|y").decode(), "--signature", base64.b64encode(pss).decode())
+    # Legacy scheme: PKCS#1 v1.5 type-1 recovery, still accepted as a fallback.
     nums = key.private_numbers(); n_, d_ = nums.public_numbers.n, nums.d
     k = (n_.bit_length() + 7) // 8
     em = b"\x00\x01" + b"\xff" * (k - len(pay) - 3) + b"\x00" + pay
-    sig = pow(int.from_bytes(em, "big"), d_, n_).to_bytes(k, "big")
-    r = run("skills/webxpay/scripts/webxpay_crypto.py", "verify", "--key", str(tmp),
-            "--payment", base64.b64encode(pay).decode(), "--signature", base64.b64encode(sig).decode())
-    bad = run("skills/webxpay/scripts/webxpay_crypto.py", "verify", "--key", str(tmp),
-              "--payment", base64.b64encode(b"x|y").decode(), "--signature", base64.b64encode(sig).decode())
+    legacy_sig = pow(int.from_bytes(em, "big"), d_, n_).to_bytes(k, "big")
+    legacy = run("skills/webxpay/scripts/webxpay_crypto.py", "verify", "--key", str(tmp),
+                 "--payment", base64.b64encode(pay).decode(), "--signature", base64.b64encode(legacy_sig).decode())
     tmp.unlink()
-    if "VALID" not in r.stdout or r.returncode: err("webxpay verify rejected a valid signature")
+    if "VALID (pss-sha1)" not in r.stdout or r.returncode: err("webxpay verify rejected a valid PSS signature: " + r.stdout)
     elif bad.returncode == 0: err("webxpay verify accepted a forged payment")
-    else: ok("webxpay RSA sign/verify round trip (accepts valid, rejects forged)")
+    elif "legacy" not in legacy.stdout: err("webxpay verify rejected the legacy PKCS#1 vector: " + legacy.stdout)
+    else: ok("webxpay RSA-PSS/SHA-1 verify (PSS + legacy accepted, forged rejected)")
 except ImportError:
     print("skip webxpay round trip (pip install cryptography)")
 
@@ -137,17 +142,6 @@ listed = {s.lstrip("./") for p in mk["plugins"] for s in p["skills"]}
 for n in skills:
     if n not in listed: err(f"marketplace.json does not list skill {n}")
 ok("plugin manifests")
-
-# 6 dist
-for n in skills:
-    z = root / "dist" / f"{n}.skill"
-    if not z.exists(): err(f"dist/{n}.skill missing (python scripts/package.py)"); continue
-    with zipfile.ZipFile(z) as zf:
-        packed = {i.filename: hashlib.sha256(zf.read(i)).hexdigest() for i in zf.infolist() if not i.is_dir()}
-    src = {str(Path(n) / f.relative_to(root / "skills" / n)).replace("\\", "/"): hashlib.sha256(f.read_bytes()).hexdigest()
-           for f in (root / "skills" / n).rglob("*") if f.is_file() and "__pycache__" not in f.parts and f.suffix != ".pyc"}
-    if packed != src: err(f"dist/{n}.skill is out of date (python scripts/package.py)")
-    else: ok(f"dist/{n}.skill up to date")
 
 # 7 README
 readme = (root / "README.md").read_text(encoding="utf-8")

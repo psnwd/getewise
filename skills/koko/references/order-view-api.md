@@ -1,6 +1,6 @@
 # Merchant Order View API
 
-Server-side status lookup. `POST {host}/api/merchants/orderView`, form-urlencoded.
+Server-side status lookup. `POST {host}/api/merchants/orderView`, form-urlencoded, no `Content-Type` needed. Returns `application/json`. Hosts: `qaapi` (QA), `prodapi` (live), `devapi` (a third environment with a **separate merchant registry** — QA/prod credentials are not interchangeable).
 
 | Field | Notes |
 |---|---|
@@ -14,6 +14,8 @@ Server-side status lookup. `POST {host}/api/merchants/orderView`, form-urlencode
 `dataString = _mId + _pluginName + _pluginVersion + _orderId + api_key` (no separators). Signed with the merchant private key.
 
 ## Response
-`orderId, trnId, status, desc, signature`; `status` is `PENDING`, `SUCCESS` or `FAILED`. Response `signature` is by Koko; verify it as in `callbacks.md` (the PDF does not spell out the signed string; assume `orderId+trnId+status` and flag that).
+JSON with a `content` wrapper: `content.orderId`, `content.trnId`, `content.status`, `content.desc`, `content.signature`, plus top-level `status` / `statusCode`. `status` is `PENDING`, `SUCCESS` or `FAILED`.
+
+Koko's own WooCommerce plugin **does not verify the response signature** — it only matches `content.orderId` to the request. A third-party SDK claims the view is RSA-signed, but no source states the exact signed string, so treat verification as optional/assumed: if you verify, assume `orderId+trnId+status` as in `callbacks.md` and flag the assumption. Match `content.orderId` regardless.
 
 Use for: missing callback, reconciliation jobs, double-checking before fulfilment.

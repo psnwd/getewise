@@ -42,28 +42,29 @@ Source: support.payhere.lk knowledge base as read Oct 2026. Fees, limits and pla
 | GOV | none | 1.99% | Rs.1,000,000 per payment; unlimited monthly | government payments; LKR via Visa/Master/HelaPay |
 
 - Over a limit: customer sees an "Over Limit" error on the payment page (monthly limit until the billing cycle ends). Upgrade plan to raise limits.
+- **Add-on fees on top of the plan rate**: AMEX / Discover / Diners **+0.5%**; foreign-currency acceptance **+1.0%**, with the amount "converted to LKR at bank exchange rate & settled in LKR"; HelaPay **1.99% on any plan**. The table above shows headline rates only.
 - Upgrade/downgrade in Settings; paid plan fee charged monthly to a Visa/Master card; downgrade gives no partial refund of the month's fee.
-- Practical implication: Recurring API needs PLUS+; preapproval/Charging API needs PREMIUM; Hold on Card is card-only (check plan availability with PayHere).
+- Practical implication: Recurring API needs PLUS+; preapproval/Charging API needs PREMIUM; Hold on Card is card-only (plan gating is not documented — unknown, not "premium only").
 
 ## 4. USD payouts
 - Receive foreign payments directly in a USD account, no LKR conversion. Requires a registered business entity and a **Seylan Bank** USD (BFC) account; PLUS or PREMIUM only; set "Payout Currency = USD" in the Activation Form of a **new** USD PayHere account (existing LKR account can't be switched).
 - USD plan numbers (docs): PLUS Rs.3,990/mo, 3.99%, USD 1,000 per payment, USD 10,000 per month; PREMIUM Rs.9,990/mo, 3.69%, USD 5,000 per payment, unlimited monthly. No setup fee.
 
 ## 5. Settlement, refunds, chargebacks
-- Payouts to your bank daily at day-end on a **T+2** cycle.
+- Payouts to your bank daily at day-end on a **T+2** cycle (KB: "daily payouts on a T+2 settlement cycle (2 days after receiving Payment Notification)"). The T&C instead says funds are "settled to the Merchant within 3 days from the payment authorized date"; quote T+2, footnote the T&C wording.
 - Refund from dashboard: Payments tab > open payment > Request Refund. No refund fee; the processing fee is returned to the customer too.
 - **Instant refund**: same-day, before day-end, processed as a void in real time.
 - **Delayed refund**: after payout; PayHere recovers funds from your bank balance/future payouts at day-end (retries daily until funds exist), then 5-10+ days to reach customer's card. Statuses: Waiting funds > Refund processing > Refund processed.
 - Only **card** payments can be refunded through PayHere (Visa, Mastercard, AMEX, Discover, Diners). Frimi, Genie, eZcash, mCash, Vishwa: refund manually via bank transfer.
-- The KB says partial refunds are not supported, but the Refund API accepts an optional `amount` for partial refunds (see `merchant-api.md`). When this matters, tell the user about the conflict and suggest confirming with support@payhere.lk before building around partial refunds.
-- Chargeback = automatic reversal demanded by card/wallet provider (`status_code -3`, Retrieval status `CHARGEBACKED`). Dispute = cardholder queries a transaction.
+- The Refund Process page says "PayHere supports only full refunds" (partial refunds "will have to" be paid manually), yet the Refund API has a "For partial refunds" sample with `"amount": "100.50"` that never marks `amount` optional or required and is invalid JSON (see `merchant-api.md` §6). Tell the user about the conflict and confirm with support@payhere.lk before building around partial refunds.
+- Chargeback = automatic reversal demanded by card/wallet provider (`status_code -3`, Retrieval status `CHARGEBACKED`). Dispute = cardholder queries a transaction. No contest timeline is published; the T&C adds that if chargebacks exceed **1% of transactions per month consecutively**, PayHere may terminate the contract, and chargebacks "may lead to immediate account termination".
 
 ## 6. Feature primers
 **Recurring billing**: customer authorizes once; PayHere charges per schedule. Store `subscription_id`. Only the merchant can cancel (dashboard subscription section or Subscription Manager API); customers must ask you. Fixed-duration subs complete on their own; "Forever" ones run until cancelled. Failure handling/retries: see `recurring-preapproval.md`.
 
 **Automated Charging (tokenization)**: customer preapproves once (Rs.1 is charged then instantly refunded), you receive an encrypted `customer_token` on notify, store it, and charge any amount on demand via Charging API. Visa/Mastercard only. Merchant cancels a preapproval in Payments > Preapprovals > Cancel Preapproval (irreversible); customers can't cancel themselves.
 
-**Hold on Card (auth & capture)**: authorize now via Authorize API, capture the same or lesser amount later via Capture API **within 7 days**; uncaptured holds auto-release after 7 days. Avoids refunds for partial fulfilment. Settles to the bank 2 days after capture. Visa/Mastercard credit cards only. Remaining uncaptured balance is released after 7 days.
+**Hold on Card (auth & capture)**: authorize now via Authorize API, capture the same or lesser amount later via Capture API **within 7 days**; uncaptured holds "cancels the authorization & releases the funds". Avoids refunds for partial fulfilment. Captures settle to the bank **2 days after capturing**. Credit cards only ("Visa & MasterCard Payment methods (Credit cards only)") — debit cards do not work. A partial capture releases the uncaptured remainder after 7 days. Which plans include it is not documented (the pricing page's tick/cross rows aren't machine-readable), so don't assert a plan requirement.
 
 ## 7. No-code options
 - **PayHere Links**: Dashboard > Payment Links > Create Link (item name + amount) > copy and share via post, email, chat, SMS. PayHere also collects customer, delivery and item details, so it doubles as order capture.

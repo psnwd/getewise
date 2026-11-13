@@ -8,6 +8,7 @@ Plugins that support onsite: WooCommerce, OpenCart (toggle in plugin settings). 
 ```html
 <script src="https://www.payhere.lk/lib/payhere-2.0.js"></script>
 ```
+The docs page is titled `payhere.js`, but the actual include is `payhere-2.0.js`; load that URL, don't hand-roll the filename.
 
 ## Flow
 1. Your **backend** creates order, computes `hash` (see `checkout-api.md` / `scripts/`), returns payment object + hash to the page. Never compute the hash in the browser.
@@ -22,7 +23,8 @@ Extras for the SDK:
 - `return_url: undefined`, `cancel_url: undefined`: **leave undefined** so the popup doesn't redirect (docs mark these "Important")
 - Preapproval: `"preapprove": true`
 - Recurring: `recurrence`, `duration` (same format as Recurring API)
-- Hold on card: `"authorize": true` (used by mobile SDKs; web SDK page lists preapprove/recurrence only)
+- Hold on card: `"authorize": true` (mobile SDKs only; the web SDK page documents `preapprove` and `recurrence` and has **no** `authorize` flag)
+- `payment_method` to skip the method picker: `VISA, MASTER, AMEX, HELAPAY, FRIMI, QPLUS`
 
 ## Events
 ```js

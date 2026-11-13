@@ -4,9 +4,13 @@
 - Sandbox hosts: checkout `https://sandbox.payhere.lk/pay/checkout`, preapprove `.../pay/preapprove`, authorize `.../pay/authorize`, REST `https://sandbox.payhere.lk/merchant/v1/...`.
 - Plugins: tick "Enable Sandbox Mode" in the plugin settings. JS/mobile SDKs: `"sandbox": true` (Android: `PHConfigs.setBaseUrl(PHConfigs.SANDBOX_URL)`).
 - Use the **sandbox** merchant ID and a secret for a sandbox-registered domain; live credentials won't work there and vice versa.
+- **No sandbox merchant ID/secret are published**: the docs only show masked placeholders (`121XXXX`, `2xxxxx`) and a non-functional example App ID/Secret pair. Get yours from your own sandbox account (Integrations).
+- **No `test`/`live` mode flag exists** for the merchant APIs: the environment is the host plus the credentials, and the OAuth token response simply returns `"scope": "SANDBOX"`.
+- Sandbox supports **USD, EUR, GBP, AUD** as well as LKR (PayHere FAQ: "Yes"), even though the LITE plan table reads LKR/USD.
+- Sandbox does **not** send failure notifications for subscription renewals (PayHere FAQ answer relayed via a community issue — third-party, not official docs).
 
 ## Test cards (published by PayHere)
-Any name, any valid CVV and expiry. Any card **not** listed fails.
+Any name, any valid CVV and expiry. Any card **not** listed fails. (PayHere's page itself has the typo "Limt Exceeded" for the limit row; the values below are byte-for-byte from that page.)
 
 | Scenario | Visa | MasterCard | AMEX |
 |---|---|---|---|

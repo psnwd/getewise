@@ -9,6 +9,7 @@
 <p align="center">
   <a href="#install-in-2-minutes">Install</a> ·
   <a href="#what-to-ask">What to ask</a> ·
+  <a href="COOKBOOK.md">Cookbook</a> ·
   <a href="#supported-gateways">Gateways</a> ·
   <a href="#how-good-is-it">Test results</a> ·
   <a href="docs/adding-a-gateway.md">Add a gateway</a>
@@ -67,12 +68,16 @@ Just talk to Claude as you normally would:
 
 Claude loads only the notes it needs, so answers stay fast and focused.
 
+Ten end-to-end workflows — checkout, BNPL, webhooks, recurring, two-gateway failover, security review, refunds, adding a gateway — are written out step by step in the [cookbook](COOKBOOK.md).
+
 ## Install in 2 minutes
 
 Pick the one that matches how you use Claude.
 
+Installing on someone's behalf, or driving this from an agent? Follow [INSTALL_FOR_AGENTS.md](INSTALL_FOR_AGENTS.md); it is written as steps with a verification check.
+
 **Claude.ai (web / desktop app)**
-1. Download the gateway you want from [`dist/`](dist) (for example `payhere.skill`).
+1. Download the gateway you want from the latest [Release](https://github.com/psnwd/getewise/releases/latest) (for example `payhere.skill`).
 2. Open **Settings**, find **Skills** (under Capabilities), and upload the file.
 3. Start a chat and ask a question.
 
@@ -144,7 +149,7 @@ What the "without" answers got wrong: invented endpoints, a made-up signature sc
 ## Good to know
 
 - **Unofficial.** Gatewise isn't made by or affiliated with PayHere, OnePay, WebXPay, Genie Business (Dialog), Koko or their banks. Names belong to their owners.
-- **Docs change.** Notes come from each gateway's public docs (read October 2026). Fees, limits and policies can change, and each skill tells Claude to say so and send contract questions to the gateway.
+- **Docs change.** Notes come from each gateway's public docs (read October 2026, re-checked 13 November 2026). Fees, limits and policies can change, and each skill tells Claude to say so and send contract questions to the gateway. What the re-check resolved, and what is still unpublished, is in [`docs/doc-recheck-2026-11.md`](docs/doc-recheck-2026-11.md).
 - **Gaps are flagged, not guessed.** When a gateway's docs are missing or contradict themselves, the skill lists it in `references/troubleshooting.md` and Claude is told to say so instead of inventing an answer.
 - **Test in sandbox first,** then go live. Never paste real secrets into chat.
 
@@ -163,8 +168,9 @@ Full steps: [docs/adding-a-gateway.md](docs/adding-a-gateway.md). Contributions 
 
 ```
 gatewise/
+├── COOKBOOK.md    ten worked workflows: what to say, what the agent does
 ├── skills/        one folder per gateway (this is what you install)
-├── dist/          ready-to-upload .skill files
+├── dist/          build output (gitignored), made by scripts/package.py
 ├── .claude-plugin/ plugin + marketplace manifests (for /plugin install)
 ├── .github/       CI (verify on every PR) and release workflow
 ├── evals/         the test questions and graders for each skill

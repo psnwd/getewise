@@ -11,14 +11,16 @@ Form-POST redirect flow. Customer's browser is POSTed to PayHere, pays there, Pa
 6. Gotchas
 
 ## 1. Prerequisites
-- **Merchant ID**: PayHere dashboard > Integrations. Unique per account.
+- **Merchant ID**: PayHere dashboard > Side Menu > Integrations. Unique per account.
 - **Merchant Secret**: per domain/app. Integrations > Add Domain/App > enter top-level domain (or app package name) > Request to Allow > wait up to ~24h for approval > copy secret. New domain/app = new secret.
 
 ## 2. Redirect the customer
 
 POST (HTML form, `application/x-www-form-urlencoded`) to:
-- Live: `https://www.payhere.lk/pay/checkout` (**must include `www`**, else error PH-0022)
+- Live: `https://www.payhere.lk/pay/checkout` (**must include `www`**; docs say omitting it "may result in" PH-0022)
 - Sandbox: `https://sandbox.payhere.lk/pay/checkout`
+
+Recurring has no action URL of its own: it posts to this same `/pay/checkout`. Preapprove uses `/pay/preapprove` and authorize `/pay/authorize` (see `recurring-preapproval.md`, `merchant-api.md`).
 
 Required params: `merchant_id`, `return_url`, `cancel_url`, `notify_url` (public IP/domain, not localhost), `first_name`, `last_name`, `email` (valid format), `phone` (valid), `address`, `city`, `country`, `order_id`, `items`, `currency` (LKR/USD), `amount`, `hash` (required since 2023-01-16).
 
@@ -52,7 +54,7 @@ Use the values **exactly as received** (do not reformat `payhere_amount`). Compa
 | Error | Likely cause / fix |
 |---|---|
 | Unauthorized payment request | Wrong/mismatched hash values; request not from registered domain; wrong secret for that domain; `Referer` header stripped (avoid `no-referrer`); duplicate Integration records for one domain |
-| Unexpected Error (PH-0022) | Live URL missing `www` |
+| Unexpected Error (PH-0022) | Live URL missing `www` ("may result in" PH-0022 per docs) |
 | Unexpected error with HelaPay | Missing/invalid email or phone |
 | Something went wrong (code) | Missing required params, or invalid content (emoji, script tags) in values |
 
@@ -61,4 +63,5 @@ Use the values **exactly as received** (do not reformat `payhere_amount`). Compa
 - Can't test notify on localhost: use a tunnel (ngrok, cloudflared) or deployed URL.
 - `return_url` gets **no payment status params**. Read status from your DB (written by notify handler).
 - Respond 200 quickly from notify handler; do the heavy work after.
+- notify is attempted **once** (no retry, no re-send API), so reconcile with `GET /merchant/v1/payment/search?order_id=` on a schedule (see `troubleshooting.md` §2).
 - Each domain/app has its own secret; sandbox and live use different merchant credentials/secrets (see sandbox reference).

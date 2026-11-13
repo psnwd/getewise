@@ -12,7 +12,7 @@
 |---|---|
 | Global webhook | Merchant dashboard, Connect > Webhooks. Receives every event for every transaction |
 | Single transaction | `webhook` field on Create Transaction |
-| Webhook Apps | create/delete programmatically via the Create Webhook API (Stoplight "Webhooks" group); useful for Zapier/IFTTT and for segmenting events. A new webhook app also receives updates for existing transactions |
+| Webhook Apps | create/delete programmatically: `POST {base}/public/webhooks` with `{"hookUrl": "..."}` → 200 `{created, updated, companyId, hookUrl, id}`; `DELETE {base}/public/webhooks` with `{"hookUrl": "..."}` → 204. Useful for Zapier/IFTTT and for segmenting events. A new webhook app also receives updates for existing transactions |
 
 If several are configured, the event is POSTed to all active ones, so your handler can see the same event twice. Make it idempotent.
 
@@ -59,9 +59,9 @@ valid      = (expected == X-Signature)       // compare in constant time
 ```
 Header names are case-insensitive in HTTP, so read them case-insensitively (Node lowercases them). Use the API key of the same environment (UAT vs production).
 
-Limits, said plainly: the signature covers only nonce + timestamp + key, not the body. Anyone who captured one valid request's headers could replay them with a different body. So:
+Limits, said plainly: the signature covers only nonce + timestamp + key, not the body. Anyone who captured one valid request's headers could replay them with a different body. The timestamp **format** and any **tolerance / replay window** are genuinely undocumented — the doc sample passes the literal `'your_timestamp'` — so nonce caching is your mitigation, not theirs. So:
 1. Verify the headers (stops casual spoofing).
-2. Optionally reject old timestamps and remember nonces (our suggestion; the docs don't specify the timestamp format or tolerance).
+2. Optionally reject old timestamps and remember nonces (our suggestion only).
 3. **Always re-query the transaction** and decide from the API response, never from the webhook body. The docs say the same.
 
 `scripts/genie_webhook.py` computes and checks this.
@@ -74,4 +74,11 @@ Limits, said plainly: the signature covers only nonce + timestamp + key, not the
 - Docs don't publish source IPs, so don't IP-filter.
 
 ## 5. Deprecated signature
-The body field `originalSignature` is documented as deprecated: `base64(md5(querystring({amount, currency, apiKey})))`. A sample in the card-on-file page shows a 40-hex value there (sha1-looking), and the main sample a short base64 one, so the field is not consistent across the docs. Don't build on it. Prefer the header signature plus an API re-query.
+Two different legacy fields, two different hashes; neither covers the body:
+
+| Field | Value |
+|---|---|
+| `originalSignature` (body) | `base64(md5("amount=<amount>&currency=<currency>&apiKey=<key>"))` — deprecated; that is why the sample is 24 chars (`wzczRUp5i/0DqS5LzGVQUw==`) |
+| `signature` (body) | `sha1("amount=<amount>&currency=<currency>&apiKey=<key>")` hex, 40 chars — what the official WooCommerce plugin verifies (official SDK/plugin) |
+
+Don't build on either: they only bind amount, currency and key. Prefer the header signature plus an API re-query.

@@ -5,7 +5,7 @@ description: Expert knowledge of OnePay (onepay.lk, docs.onepay.lk), the Sri Lan
 
 # OnePay
 
-OnePay (onepay.lk) is a Sri Lankan payment gateway (cards, Frimi, QPlus, HelaPay, Google Pay; 10 currencies, settled in LKR). API v3 at `https://api.onepay.lk`. This skill packs the public docs (docs.onepay.lk, read Oct 2026) into focused references. The docs are thin in places; `references/troubleshooting.md` lists the gaps and contradictions. Flag them, don't paper over them.
+OnePay (onepay.lk) is a Sri Lankan payment gateway (cards, Frimi, QPlus, HelaPay, Google Pay; 10 currencies, settled in LKR). API v3 at `https://api.onepay.lk`. This skill packs the public docs (docs.onepay.lk, read Oct 2026 and re-checked Nov 2026) into focused references. The docs are thin in places; `references/troubleshooting.md` lists the gaps and contradictions. Flag them, don't paper over them.
 
 ## How to use this skill
 1. Pick the task from the routing table.
@@ -18,7 +18,8 @@ OnePay (onepay.lk) is a Sri Lankan payment gateway (cards, Frimi, QPlus, HelaPay
 | User needs | Read |
 |---|---|
 | Redirect checkout, hash, create transaction, status check, callback | `references/payment-api.md` |
-| Popup/overlay checkout (`onePayData`), npm SDK, subscriptions via SDK | `references/js-sdk.md` |
+| Popup/overlay checkout (`onePayData`), npm SDK | `references/js-sdk.md` |
+| Subscriptions / recurring API (`/v3/subscription/`, trials, manual retry) | `references/subscriptions.md` |
 | Payment Links, Items | `references/links-items.md` |
 | Card on File / tokenized auto-charging | `references/card-on-file.md` |
 | Refunds, payouts, settlement, fees | `references/refund-payouts.md` |
@@ -29,12 +30,12 @@ OnePay (onepay.lk) is a Sri Lankan payment gateway (cards, Frimi, QPlus, HelaPay
 | App uses several gateways: env layout, callback routes, shared idempotent settle | `references/multi-provider.md` |
 
 ## Core rules
-1. **Two auth styles.** Payment API (create transaction) signs the body with `hash = SHA256(app_id + currency + amount + HASH_SALT)` (plain concatenation, amount like `100.00`). Everything else (Refund, Payouts, Payment Link, Card on File, Items) uses the App Token in the `Authorization` header. Keep `HASH_SALT` and App Token server-side.
-2. **Create transaction** = `POST /v3/checkout/link/`, send the App Token in `Authorization` too (the 401 docs and the JS flow imply it), then redirect the customer **in the same window** to the returned `redirect_url`.
-3. **Never trust the return URL.** After the redirect, or on a callback, confirm with `POST /v3/transaction/status/` (`app_id` + `onepay_transaction_id`) and check `status == true`, amount and currency against your order.
-4. **Callbacks are unsigned.** The JSON callback (`transaction_id`, `status`, `status_message`, `additional_data`) has no documented signature, so treat it as a trigger and verify through the status API. Callback URL is set in the portal's APP section; must accept POST JSON and return 200.
-5. **IDs differ by name.** Create response gives `ipg_transaction_id`; Status/Refund/Payouts call it `onepay_transaction_id`; callbacks call it `transaction_id`. Store it at checkout.
-6. **Sandbox vs live** have separate credentials. Refunds work only on live transactions.
+1. **Two auth styles.** Payment API (create transaction) signs the body with `hash = SHA256(app_id + currency + amount + HASH_SALT)` (plain concatenation, lowercase 64-char hex; amount `toFixed(2)`, currency uppercased). Everything else (Refund, Payouts, Payment Link, Card on File, Items, Subscriptions) uses the App Token in the `Authorization` header — raw, not `Bearer` (the API advertises `WWW-Authenticate: AppToken`). Keep `HASH_SALT` and App Token server-side.
+2. **Create transaction** = `POST /v3/checkout/link/`, send the App Token in `Authorization` too, then redirect the customer **in the same window** to `data.gateway.redirect_url` from the response.
+3. **Never trust the return URL.** After the redirect, or on a callback, confirm with `POST /v3/transaction/status/` (`app_id` + `onepay_transaction_id`) and check `data.status == true` (nested), amount and currency against your order.
+4. **Callbacks carry no signature in the body.** The JSON callback (`transaction_id`, `status`, `status_message`, `additional_data`) has no documented signature, so treat it as a trigger and verify through the status API. A per-app **Callback Token** and **CIDR allowlist** can be configured in the portal, but how the token is transmitted is undocumented. Callback URL is set in the portal's APP section; must accept POST JSON and return 200.
+5. **IDs differ by name.** Create response gives `ipg_transaction_id`; Status/Refund/Payouts call it `onepay_transaction_id`; callbacks call it `transaction_id` — the same value under three labels. Store it at checkout.
+6. **Sandbox is an app mode, not a host.** Same `https://api.onepay.lk`, app in `On Development` state with its own App ID/Token/Hash Salt. Refunds work only on live transactions.
 7. **Rate limit** per App ID; 429 means back off (the docs say "per second"); retry with exponential backoff.
 8. **Customer phone** must be E.164 (`+94771234567`); `transaction_redirect_url` must be HTTPS.
 

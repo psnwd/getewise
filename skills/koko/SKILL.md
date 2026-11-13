@@ -28,11 +28,19 @@ Koko is a Sri Lankan Buy-Now-Pay-Later gateway: customer is redirected to Koko, 
 1. **Request is a signed form POST** to `{host}/api/merchants/orderCreate` (`application/x-www-form-urlencoded`), done by the customer's browser via an auto-submitting hidden form. Hosts: `devapi`, `qaapi`, `prodapi` `.paykoko.com`.
 2. **Signature:** `dataString` = plain concatenation (no separators) of `_mId, _amount, _currency, _pluginName, _pluginVersion, _returnUrl, _cancelUrl, _orderId, _reference, _firstName, _lastName, _email, _description, api_key, _responseUrl` in exactly that order. `signature = base64(RSA-SHA256 PKCS#1 v1.5 sign(merchant private key, dataString))`. Send both `dataString` and `signature`.
 3. **Sign on the server**, amount from your DB, never from the client. The merchant private key never leaves the server; Koko holds the merchant public key.
-4. **`_responseUrl` is the source of truth.** Koko POSTs `orderId, trnId, status, desc, signature` server-to-server. Verify `signature` over `orderId+trnId+status` with Koko's public key, then check `orderId`/amount against your DB, then mark paid (idempotently).
+4. **`_responseUrl` is the source of truth.** Koko POSTs `orderId, trnId, status, signature` server-to-server, as JSON **or** form-encoded — parse both. Verify `signature` (RSA-SHA256 PKCS#1 v1.5) over `orderId+trnId+status` with Koko's public key, then check `orderId`/amount against your DB, then mark paid (idempotently). Always answer `200`, even on rejection: Koko retries otherwise.
 5. **`_returnUrl` / `_cancelUrl` are browser redirects**, unsigned (`status` SUCCESS/FAILURE/CANCELED). Use them for UX only; never fulfil an order from them.
 6. `_orderId` must be unique per request; `_amount` is a decimal string like `300.00`; `_currency` is `LKR`.
 7. **Reconcile** with `orderView` (status PENDING/SUCCESS/FAILED) when the callback is missing.
-8. `_pluginName` is `customapi` for custom integrations; `_pluginVersion` is your own version string, and it is part of the signed data.
+8. `_pluginName` is `customapi` for custom integrations; `_pluginVersion` is your own version string, and it is part of the signed data. Both must match the plugin registration Koko holds for your MID or `orderCreate` fails with `merchantPluginDetail.apiKey.invalid`.
+9. **Refunds are portal-only and full-only.** There is no refund API and no partial refunds: the merchant clicks "process refund" on the order in the portal. Commission is returned on a refund; the processing fee is not.
+
+## Merchant account, fees, support
+- Merchant portal: `https://merchant-v2.paykoko.com` (live), `https://qa-merchant.paykoko.com` (QA). Tabs: Billing, Orders (with a Refunds column), Finance (pay cycles).
+- Commission is **~12% of order value**, plus a non-refundable processing fee; may vary per Merchant Agreement.
+- Settlement is **twice monthly** (transactions roughly 1st–15th and 15th–end of month).
+- `PayNow` is a Koko option where the shopper pays the full amount upfront instead of Pay Later; refunds work the same way.
+- Support: `merchant.support@paykoko.com`, `011 765 7167`.
 
 ## Working style
 - **Env files:** for several providers, one block per provider under a banner, **two blank lines between blocks**, every var prefixed (`PAYHERE_*`, `ONEPAY_*`, `WEBXPAY_*`, `GENIE_*`, `KOKO_*`), host/base URL first so sandbox vs live is obvious. Only vars the generated code reads; empty placeholders, never real keys. If the user names no provider, include a block for all five. Shape:

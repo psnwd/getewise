@@ -15,6 +15,8 @@ Use in `payment_gateway_id` (one) or `multiple_payment_gateway_ids` (`40|44|96`)
 
 EMI IDs (LKR): NTB AMEX 23-28 (3, 6, 12, 20, 24, 36 months); HNB 48-51 (3, 6, 12, 24); DFCC 53-56 and 66-72 (3, 6, 7, 9, 12, 15, 18, 24, 27, 36, 41); Commercial 57-65 (3, 6, 9, 12, 18, 24, 36, 48, 60); NDB 75-81 (6, 9, 12, 18, 24, 36, 60); Seylan 90-92 (6, 12, 24); Union Bank 97-102 (3, 6, 12, 18, 24, 36).
 Gateways are enabled per merchant: an ID your account doesn't have gives error 414/415.
+The published list stops at the labels; there is no ID → card-scheme mapping beyond the name. A 2024 captured response reports `payment_gateway_used = 93`, which is **not** in the list — don't guess which bank it is.
+Display names differ slightly between pages ("Sampath Viswa", "Cargils Bank", "Genie Visa Master", "Commercial Bank MPGS", "UPay").
 
 ## Bank MIDs (Token V2 / bank-level)
 | Integration | Staging | Live |
@@ -24,3 +26,7 @@ Gateways are enabled per merchant: an ID your account doesn't have gives error 4
 | CUP | DFCCPAYCORPTOKENLKR | DFCCPAYCORPTOKENLKR |
 | Amex | TEST9170137012 | 9170137012 |
 Which MID applies to your account is set at onboarding.
+
+## Test data (published in the Token v2.2 guide)
+Cards, any future expiry, any 3-digit CVV: `4111 1111 1111 1111` Visa with 3DS · `5111 1111 1111 1118` Mastercard without 3DS · `4564 4564 4564 4564` CUP and Amex · `4508 7500 1574 1019` Visa with 3DS · `4012 0000 3333 0026` Visa without 3DS · `5123 4500 0000 0008` Mastercard with 3DS.
+The official samples also ship staging `secret_key`s and 1024-bit public keys. They are public — use them to test the flow, never on live.
